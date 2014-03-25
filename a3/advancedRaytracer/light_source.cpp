@@ -34,7 +34,7 @@ void PointLight::shade( Ray3D& ray, const bool shadow) {
     v_h.normalize();
     double n = ray.intersection.mat->specular_exp;
     if (shadow)
-        ray.col = 0.5*ray.intersection.mat->diffuse*_col_ambient;
+        ray.col = 0.3*ray.intersection.mat->diffuse*_col_ambient;
     else
     {
         Colour col_d = fmax(0, v_n.dot(v_l))*ray.intersection.mat->diffuse*_col_diffuse;

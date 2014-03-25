@@ -25,10 +25,10 @@
 
 // #define DEPTH_OF_FIELD
 // #define GLOSS
-#define SOFT_SHADOW
+// #define SOFT_SHADOW
 #define ANTI_ALIASING
 
-//#define REFLECTION
+#define REFLECTION
 // #define REFRACTION 
 Raytracer::Raytracer() : _lightSource(NULL) {
 	_root = new SceneDagNode();
@@ -486,14 +486,14 @@ int main(int argc, char* argv[])
 				Colour(0.4, 0.4, 0.4) ) );
 
 	// Add a unit square into the scene with material mat.
-	SceneDagNode* sphere = raytracer.addObject( new UnitSphere(), &gold );
-	SceneDagNode* sphere_2 = raytracer.addObject( new UnitSphere(), &blue );
-	SceneDagNode* sphere_3 = raytracer.addObject( new UnitSphere(), &black );
 	SceneDagNode* plane_right = raytracer.addObject( new UnitSquare(), &red );
 	SceneDagNode* plane_up = raytracer.addObject( new UnitSquare(), &yellow );
 	SceneDagNode* plane_left = raytracer.addObject( new UnitSquare(), &cyan);
 	SceneDagNode* plane_down = raytracer.addObject( new UnitSquare(), &green );
 	SceneDagNode* plane = raytracer.addObject( new UnitSquare(), &jade );
+	SceneDagNode* sphere = raytracer.addObject( new UnitSphere(), &gold );
+	SceneDagNode* sphere_2 = raytracer.addObject( new UnitSphere(), &blue );
+	SceneDagNode* sphere_3 = raytracer.addObject( new UnitSphere(), &black );
 	
 	// Apply some transformations to the unit square.
 	double factor1[3] = { 1.0, 2.0, 1.0 };
