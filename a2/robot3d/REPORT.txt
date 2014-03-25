@@ -1,0 +1,35 @@
+Assginment 2 Part B REPORT
+
+Name: Shenlong Wang
+ID: 1001118925
+CDF Account: c4wangsj
+
+Implementation Details:
+
+a) The shapes and deformations of the parts of robot is similar with what I have implemented in the previous assignment. To be specific, it is designed according to the following tree: 
+
+Figure: The kinematic tree of the robot parts:
+--body
+    --lowerbody
+        --left leg
+        --right leg
+    --left arm
+        --left forearm
+    --right arm
+        --right forarm
+    --neck
+        --head
+            --left eye
+            --right eye
+
+I also scale and translate each part properly to make the robot have a proper body shape ratio. To note that, different to the previous 2D case, in 3D case we also need to specify the shape of each 3D cube. The other difference lies in drawing polygons. In order to get different rendering effects under illumination, we need to specify each polygon's normal vector when drawing polygons, and these vectors may be altered after resizing. Therefore, GL_NOMARLIZED should be called. During designing the robot, we need to specify many parameters to decide the rotation, translation, size, etc. Among them 25 parameters are loaded by keyframes file / annimation panel, according to the assignment requirements. I also set a default value for all the parameters and the contral panels.  
+
+b) Basic rendering styles includes solid, wireframe and wireframe with outline. Along with the two material properties, I design a function called 'renderStyle' to choose the rendering strategy in each case. In the rendering styles, I use glPolygonMode to specify whether draw a line or the surface, or both. To note that, in order to make outline visible, glPolygonOffset is used.  
+
+c) In order to implement material properties, I need to manually change the shades properties of each polygons. To be specific, I manually set the color and intensity of ambient and specular lights for different cases. And more importantly use shineness paramter to control the reflectance property of the robot, make it look more matte or metallic. 
+
+d) In the light source control, I design three spinners to control the light position. The other parameters of the light, including the color and intensity of different types of lights are pre-chosen manually. I set the light source enough far away from the object according to the requirement.  
+
+e) Callback function of Update keyframe button is completed first. And then I specify each pose of the robots manually for each keyframe and stored them in keyframes.txt. 
+
+f) Keyframes are interploted bo Catmull-ROm interpolation method provided in the helper code. And full frames of the animation is stored in keyframe*.ppm files. 

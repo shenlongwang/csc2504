@@ -1,0 +1,190 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+BEAK	keyframe.h	/^		   BEAK,$/;"	e	enum:Keyframe::__anon1
+BEAK_MAX	robot.cpp	/^const float BEAK_MAX             =  1.0;$/;"	v
+BEAK_MIN	robot.cpp	/^const float BEAK_MIN             =  0.0;$/;"	v
+BLUE_OFFSET	robot.cpp	1021;"	d	file:
+CAMERA_FOVY	robot.cpp	/^const GLdouble CAMERA_FOVY = 60.0;$/;"	v
+CC	Makefile	/^CC            = gcc$/;"	m
+CCC	Makefile	/^CCC	          = \/usr\/bin\/g++$/;"	m
+CCCFLAGS	Makefile	/^CCCFLAGS      = -Wall -c -g$/;"	m
+CFLAGS	Makefile	/^CFLAGS        = -Wall -c -g$/;"	m
+CPPFLAGS	Makefile	/^CPPFLAGS      = -I.\/ -I\/u\/csc418h\/include\/fall05\/include $/;"	m
+CPPSRCS	Makefile	/^CPPSRCS       = robot.cpp vector.cpp$/;"	m
+CSRCS	Makefile	/^CSRCS         =$/;"	m
+DEST	Makefile	/^DEST	      = .$/;"	m
+DUMP_FRAME_PER_SEC	robot.cpp	/^const float DUMP_FRAME_PER_SEC = 24.0;		\/\/ frame rate for dumped frames$/;"	v
+DUMP_SEC_PER_FRAME	robot.cpp	/^const float DUMP_SEC_PER_FRAME = 1.0 \/ DUMP_FRAME_PER_SEC;$/;"	v
+ELBOW_MAX	robot.cpp	/^const float ELBOW_MAX            = 75.0;$/;"	v
+ELBOW_MIN	robot.cpp	/^const float ELBOW_MIN            =  0.0;$/;"	v
+FAR_CLIP	robot.cpp	/^const GLdouble FAR_CLIP    = 1000.0;$/;"	v
+GL_LIBS	Makefile	/^GL_LIBS       = -L\/u\/csc418h\/include\/fall05\/lib  -lGLU -lGL -lglut -lglui$/;"	m
+GREEN_OFFSET	robot.cpp	1020;"	d	file:
+HEAD	keyframe.h	/^		   HEAD,$/;"	e	enum:Keyframe::__anon1
+HEAD_MAX	robot.cpp	/^const float HEAD_MAX             =  180.0;$/;"	v
+HEAD_MIN	robot.cpp	/^const float HEAD_MIN             = -180.0;$/;"	v
+HIP_PITCH_MAX	robot.cpp	/^const float HIP_PITCH_MAX        =  45.0;$/;"	v
+HIP_PITCH_MIN	robot.cpp	/^const float HIP_PITCH_MIN        = -45.0;$/;"	v
+HIP_ROLL_MAX	robot.cpp	/^const float HIP_ROLL_MAX         =  45.0;$/;"	v
+HIP_ROLL_MIN	robot.cpp	/^const float HIP_ROLL_MIN         = -45.0;$/;"	v
+HIP_YAW_MAX	robot.cpp	/^const float HIP_YAW_MAX          =  45.0;$/;"	v
+HIP_YAW_MIN	robot.cpp	/^const float HIP_YAW_MIN          = -45.0;$/;"	v
+KEYFRAME_MAX	robot.cpp	/^const int KEYFRAME_MAX = 32;	\/\/ README: specifies the max number of keyframes$/;"	v
+KEYFRAME_MIN	robot.cpp	/^const int KEYFRAME_MIN = 0;$/;"	v
+KNEE_MAX	robot.cpp	/^const float KNEE_MAX             = 75.0;$/;"	v
+KNEE_MIN	robot.cpp	/^const float KNEE_MIN             =  0.0;$/;"	v
+Keyframe	keyframe.h	/^	Keyframe() : id(0), time(0.0), jointDOFS(NUM_JOINT_ENUM) {}$/;"	f	class:Keyframe
+Keyframe	keyframe.h	/^class Keyframe$/;"	c
+LDFLAGS	Makefile	/^LDFLAGS	      =$/;"	m
+LIBS	Makefile	/^LIBS	      = $(GL_LIBS) $(GLUT_LIBS) -lm $(XLIBS) -ldl$/;"	m
+LINKER	Makefile	/^LINKER	      = g++$/;"	m
+L_ELBOW	keyframe.h	/^		   L_ELBOW,$/;"	e	enum:Keyframe::__anon1
+L_HIP_PITCH	keyframe.h	/^		   L_HIP_PITCH,      L_HIP_YAW,        L_HIP_ROLL,$/;"	e	enum:Keyframe::__anon1
+L_HIP_ROLL	keyframe.h	/^		   L_HIP_PITCH,      L_HIP_YAW,        L_HIP_ROLL,$/;"	e	enum:Keyframe::__anon1
+L_HIP_YAW	keyframe.h	/^		   L_HIP_PITCH,      L_HIP_YAW,        L_HIP_ROLL,$/;"	e	enum:Keyframe::__anon1
+L_KNEE	keyframe.h	/^		   L_KNEE,$/;"	e	enum:Keyframe::__anon1
+L_SHOULDER_PITCH	keyframe.h	/^		   L_SHOULDER_PITCH, L_SHOULDER_YAW,   L_SHOULDER_ROLL,$/;"	e	enum:Keyframe::__anon1
+L_SHOULDER_ROLL	keyframe.h	/^		   L_SHOULDER_PITCH, L_SHOULDER_YAW,   L_SHOULDER_ROLL,$/;"	e	enum:Keyframe::__anon1
+L_SHOULDER_YAW	keyframe.h	/^		   L_SHOULDER_PITCH, L_SHOULDER_YAW,   L_SHOULDER_ROLL,$/;"	e	enum:Keyframe::__anon1
+NEAR_CLIP	robot.cpp	/^const GLdouble NEAR_CLIP   = 0.1;$/;"	v
+NUM_JOINT_ENUM	keyframe.h	/^		   NUM_JOINT_ENUM };$/;"	e	enum:Keyframe::__anon1
+OBJ	Makefile	/^OBJ           = $(CPPSRCS:.cpp=.o) $(CSRCS:.c=.o)$/;"	m
+OUTLINED	robot.cpp	/^enum { WIREFRAME, SOLID, OUTLINED };	\/\/ README: the different render styles$/;"	e	enum:__anon2	file:
+PI	robot.cpp	/^const float PI = 3.14159;$/;"	v
+PROGRAM	Makefile	/^PROGRAM	          = robot$/;"	m
+RED_OFFSET	robot.cpp	1019;"	d	file:
+ROOT_ROTATE_X	keyframe.h	/^		   ROOT_ROTATE_X,    ROOT_ROTATE_Y,    ROOT_ROTATE_Z,$/;"	e	enum:Keyframe::__anon1
+ROOT_ROTATE_X_MAX	robot.cpp	/^const float ROOT_ROTATE_X_MAX    =  180.0;$/;"	v
+ROOT_ROTATE_X_MIN	robot.cpp	/^const float ROOT_ROTATE_X_MIN    = -180.0;$/;"	v
+ROOT_ROTATE_Y	keyframe.h	/^		   ROOT_ROTATE_X,    ROOT_ROTATE_Y,    ROOT_ROTATE_Z,$/;"	e	enum:Keyframe::__anon1
+ROOT_ROTATE_Y_MAX	robot.cpp	/^const float ROOT_ROTATE_Y_MAX    =  180.0;$/;"	v
+ROOT_ROTATE_Y_MIN	robot.cpp	/^const float ROOT_ROTATE_Y_MIN    = -180.0;$/;"	v
+ROOT_ROTATE_Z	keyframe.h	/^		   ROOT_ROTATE_X,    ROOT_ROTATE_Y,    ROOT_ROTATE_Z,$/;"	e	enum:Keyframe::__anon1
+ROOT_ROTATE_Z_MAX	robot.cpp	/^const float ROOT_ROTATE_Z_MAX    =  180.0;$/;"	v
+ROOT_ROTATE_Z_MIN	robot.cpp	/^const float ROOT_ROTATE_Z_MIN    = -180.0;$/;"	v
+ROOT_TRANSLATE_X	keyframe.h	/^	enum { ROOT_TRANSLATE_X, ROOT_TRANSLATE_Y, ROOT_TRANSLATE_Z,$/;"	e	enum:Keyframe::__anon1
+ROOT_TRANSLATE_X_MAX	robot.cpp	/^const float ROOT_TRANSLATE_X_MAX =  5.0;$/;"	v
+ROOT_TRANSLATE_X_MIN	robot.cpp	/^const float ROOT_TRANSLATE_X_MIN = -5.0;$/;"	v
+ROOT_TRANSLATE_Y	keyframe.h	/^	enum { ROOT_TRANSLATE_X, ROOT_TRANSLATE_Y, ROOT_TRANSLATE_Z,$/;"	e	enum:Keyframe::__anon1
+ROOT_TRANSLATE_Y_MAX	robot.cpp	/^const float ROOT_TRANSLATE_Y_MAX =  5.0;$/;"	v
+ROOT_TRANSLATE_Y_MIN	robot.cpp	/^const float ROOT_TRANSLATE_Y_MIN = -5.0;$/;"	v
+ROOT_TRANSLATE_Z	keyframe.h	/^	enum { ROOT_TRANSLATE_X, ROOT_TRANSLATE_Y, ROOT_TRANSLATE_Z,$/;"	e	enum:Keyframe::__anon1
+ROOT_TRANSLATE_Z_MAX	robot.cpp	/^const float ROOT_TRANSLATE_Z_MAX =  5.0;$/;"	v
+ROOT_TRANSLATE_Z_MIN	robot.cpp	/^const float ROOT_TRANSLATE_Z_MIN = -5.0;$/;"	v
+R_ELBOW	keyframe.h	/^		   R_ELBOW,$/;"	e	enum:Keyframe::__anon1
+R_HIP_PITCH	keyframe.h	/^		   R_HIP_PITCH,      R_HIP_YAW,        R_HIP_ROLL,$/;"	e	enum:Keyframe::__anon1
+R_HIP_ROLL	keyframe.h	/^		   R_HIP_PITCH,      R_HIP_YAW,        R_HIP_ROLL,$/;"	e	enum:Keyframe::__anon1
+R_HIP_YAW	keyframe.h	/^		   R_HIP_PITCH,      R_HIP_YAW,        R_HIP_ROLL,$/;"	e	enum:Keyframe::__anon1
+R_KNEE	keyframe.h	/^		   R_KNEE,$/;"	e	enum:Keyframe::__anon1
+R_SHOULDER_PITCH	keyframe.h	/^		   R_SHOULDER_PITCH, R_SHOULDER_YAW,   R_SHOULDER_ROLL,$/;"	e	enum:Keyframe::__anon1
+R_SHOULDER_ROLL	keyframe.h	/^		   R_SHOULDER_PITCH, R_SHOULDER_YAW,   R_SHOULDER_ROLL,$/;"	e	enum:Keyframe::__anon1
+R_SHOULDER_YAW	keyframe.h	/^		   R_SHOULDER_PITCH, R_SHOULDER_YAW,   R_SHOULDER_ROLL,$/;"	e	enum:Keyframe::__anon1
+SEC_PER_FRAME	robot.cpp	/^const float SEC_PER_FRAME = 1.0 \/ 60.0;$/;"	v
+SHOULDER_PITCH_MAX	robot.cpp	/^const float SHOULDER_PITCH_MAX   =  45.0;$/;"	v
+SHOULDER_PITCH_MIN	robot.cpp	/^const float SHOULDER_PITCH_MIN   = -45.0;$/;"	v
+SHOULDER_ROLL_MAX	robot.cpp	/^const float SHOULDER_ROLL_MAX    =  45.0;$/;"	v
+SHOULDER_ROLL_MIN	robot.cpp	/^const float SHOULDER_ROLL_MIN    = -45.0;$/;"	v
+SHOULDER_YAW_MAX	robot.cpp	/^const float SHOULDER_YAW_MAX     =  45.0;$/;"	v
+SHOULDER_YAW_MIN	robot.cpp	/^const float SHOULDER_YAW_MIN     = -45.0;$/;"	v
+SOLID	robot.cpp	/^enum { WIREFRAME, SOLID, OUTLINED };	\/\/ README: the different render styles$/;"	e	enum:__anon2	file:
+SPINNER_SPEED	robot.cpp	/^const float SPINNER_SPEED = 0.1;$/;"	v
+TIME_MAX	robot.cpp	/^const float TIME_MAX = 10.0;	\/\/ README: specifies the max time of the animation$/;"	v
+TIME_MIN	robot.cpp	/^const float TIME_MIN = 0.0;$/;"	v
+Timer	timer.h	/^	Timer() { reset(); }$/;"	f	class:Timer
+Timer	timer.h	/^class Timer$/;"	c
+Vector	vector.cpp	/^Vector::Vector(const Vector& vec)$/;"	f	class:Vector
+Vector	vector.cpp	/^Vector::Vector(int dim)$/;"	f	class:Vector
+Vector	vector.h	/^class Vector$/;"	c
+WIREFRAME	robot.cpp	/^enum { WIREFRAME, SOLID, OUTLINED };	\/\/ README: the different render styles$/;"	e	enum:__anon2	file:
+Win	robot.cpp	/^int Win[2];					\/\/ window (x,y) size$/;"	v
+XLIBS	Makefile	/^XLIBS         = -L\/usr\/X11R6\/lib -L\/usr\/lib -lX11$/;"	m
+ZOOM_SCALE	robot.cpp	/^const float ZOOM_SCALE = 0.01;$/;"	v
+__KEYFRAME_H__	keyframe.h	19;"	d
+__TIMER_H__	timer.h	14;"	d
+__VECTOR_H__	vector.h	25;"	d
+animate	robot.cpp	/^void animate()$/;"	f
+animateButton	robot.cpp	/^void animateButton(int)$/;"	f
+animate_mode	robot.cpp	/^int animate_mode = 0;			\/\/ 0 = no anim, 1 = animate$/;"	v
+animationTimer	robot.cpp	/^Timer* animationTimer;$/;"	v
+camXPos	robot.cpp	/^GLdouble camXPos =  0.0;$/;"	v
+camYPos	robot.cpp	/^GLdouble camYPos =  0.0;$/;"	v
+camZPos	robot.cpp	/^GLdouble camZPos = -7.5;$/;"	v
+d	vector.h	/^	int d;$/;"	m	class:Vector
+display	robot.cpp	/^void display(void)$/;"	f
+drawCube	robot.cpp	/^void drawCube()$/;"	f
+elapsed	timer.h	/^	double elapsed() const { return (double(clock() - startTime) \/ double(CLOCKS_PER_SEC)); }$/;"	f	class:Timer
+filenameF	robot.cpp	/^char filenameF[128];			\/\/ storage for frame filename$/;"	v
+filenameKF	robot.cpp	/^const char filenameKF[] = "keyframes.txt";	\/\/ file for loading \/ saving keyframes$/;"	v
+frameNumber	robot.cpp	/^int frameNumber = 0;			\/\/ current frame being dumped$/;"	v
+frameRateTimer	robot.cpp	/^Timer* frameRateTimer;$/;"	v
+frameToFile	robot.cpp	/^int frameToFile = 0;			\/\/ flag for dumping frames to file$/;"	v
+getDOF	keyframe.h	/^	float getDOF(int eDOF) const      { return jointDOFS[eDOF]; }$/;"	f	class:Keyframe
+getDOFPtr	keyframe.h	/^	float* getDOFPtr(int eDOF) { return &jointDOFS[eDOF]; }$/;"	f	class:Keyframe
+getDOFVector	keyframe.h	/^	Vector getDOFVector() const            { return jointDOFS;  }$/;"	f	class:Keyframe
+getData	vector.cpp	/^Vector::getData() const$/;"	f	class:Vector
+getDim	vector.cpp	/^Vector::getDim() const$/;"	f	class:Vector
+getID	keyframe.h	/^	int  getID() const { return id; }$/;"	f	class:Keyframe
+getIDPtr	keyframe.h	/^	int*   getIDPtr()          { return &id;              }$/;"	f	class:Keyframe
+getInterpolatedJointDOFS	robot.cpp	/^Vector getInterpolatedJointDOFS(float time)$/;"	f
+getTime	keyframe.h	/^	float getTime() const  { return time; }$/;"	f	class:Keyframe
+getTimePtr	keyframe.h	/^	float* getTimePtr()        { return &time;            }$/;"	f	class:Keyframe
+glui_joints	robot.cpp	/^GLUI* glui_joints;			\/\/ Glui window with joint controls$/;"	v
+glui_keyframe	robot.cpp	/^GLUI* glui_keyframe;		\/\/ Glui window with keyframe controls$/;"	v
+glui_render	robot.cpp	/^GLUI* glui_render;			\/\/ Glui window for render style$/;"	v
+id	keyframe.h	/^	int    id;$/;"	m	class:Keyframe
+initDS	robot.cpp	/^void initDS()$/;"	f
+initGl	robot.cpp	/^void initGl(void)$/;"	f
+initGlui	robot.cpp	/^void initGlui()$/;"	f
+initGlut	robot.cpp	/^void initGlut(int argc, char** argv)$/;"	f
+jointDOFS	keyframe.h	/^	Vector jointDOFS;$/;"	m	class:Keyframe
+joint_ui_data	robot.cpp	/^Keyframe* joint_ui_data;$/;"	v
+kFloatZero	vector.cpp	/^const float kFloatZero = 0.0001f;$/;"	v
+keyframes	robot.cpp	/^Keyframe* keyframes;			\/\/ list of keyframes$/;"	v
+lastX	robot.cpp	/^int  lastX = 0;$/;"	v
+lastY	robot.cpp	/^int  lastY = 0;$/;"	v
+loadKeyframeButton	robot.cpp	/^void loadKeyframeButton(int)$/;"	f
+loadKeyframesFromFileButton	robot.cpp	/^void loadKeyframesFromFileButton(int)$/;"	f
+main	robot.cpp	/^int main(int argc, char** argv)$/;"	f
+makeDim	vector.cpp	/^Vector::makeDim(int dim, const Vector& vec) const$/;"	f	class:Vector
+maxValidKeyframe	robot.cpp	/^int maxValidKeyframe   = 0;		\/\/ index of max VALID keyframe (in keyframe list)$/;"	v
+motion	robot.cpp	/^void motion(int x, int y)$/;"	f
+mouse	robot.cpp	/^void mouse(int button, int state, int x, int y)$/;"	f
+msg	robot.cpp	/^char msg[256];				\/\/ String used for status message$/;"	v
+operator *	vector.cpp	/^Vector::operator*(float scalar) const$/;"	f	class:Vector
+operator *=	vector.cpp	/^Vector::operator*=(float scalar)$/;"	f	class:Vector
+operator +	vector.cpp	/^Vector::operator+(const Vector& vec) const$/;"	f	class:Vector
+operator +=	vector.cpp	/^Vector::operator+=(const Vector& vec)$/;"	f	class:Vector
+operator -	vector.cpp	/^Vector::operator-(const Vector& vec) const$/;"	f	class:Vector
+operator -=	vector.cpp	/^Vector::operator-=(const Vector& vec)$/;"	f	class:Vector
+operator /	vector.cpp	/^Vector::operator\/(float scalar) const$/;"	f	class:Vector
+operator /=	vector.cpp	/^Vector::operator\/=(float scalar)$/;"	f	class:Vector
+operator =	vector.cpp	/^Vector::operator=(const Vector& vec)$/;"	f	class:Vector
+operator []	vector.cpp	/^Vector::operator[](int index) const$/;"	f	class:Vector
+operator []	vector.cpp	/^Vector::operator[](int index)$/;"	f	class:Vector
+quitButton	robot.cpp	/^void quitButton(int)$/;"	f
+renderFramesToFileButton	robot.cpp	/^void renderFramesToFileButton(int)$/;"	f
+renderStyle	robot.cpp	/^int renderStyle = WIREFRAME;			\/\/ README: the selected render style$/;"	v
+reset	timer.h	/^	void reset() { startTime = clock(); }$/;"	f	class:Timer
+reshape	robot.cpp	/^void reshape(int w, int h)$/;"	f
+saveKeyframesToFileButton	robot.cpp	/^void saveKeyframesToFileButton(int)$/;"	f
+setDOF	keyframe.h	/^	void  setDOF(int eDOF, float val) { jointDOFS[eDOF] = val;  }$/;"	f	class:Keyframe
+setDOFVector	keyframe.h	/^	void   setDOFVector(const Vector& vec) { jointDOFS = vec;   }$/;"	f	class:Keyframe
+setID	keyframe.h	/^	void setID(int i)  { id = i;    }$/;"	f	class:Keyframe
+setTime	keyframe.h	/^	void  setTime(float t) { time = t;    }$/;"	f	class:Keyframe
+startTime	timer.h	/^	clock_t startTime;$/;"	m	class:Timer
+status	robot.cpp	/^GLUI_StaticText* status;	\/\/ Status message ("Status: <msg>")$/;"	v
+time	keyframe.h	/^	float  time;$/;"	m	class:Keyframe
+updateCamZPos	robot.cpp	/^bool updateCamZPos = false;$/;"	v
+updateKeyframeButton	robot.cpp	/^void updateKeyframeButton(int)$/;"	f
+v	vector.h	/^	float* v;$/;"	m	class:Vector
+windowID	robot.cpp	/^int windowID;				\/\/ Glut window ID (for display)$/;"	v
+writeFrame	robot.cpp	/^void writeFrame(char* filename, bool pgm, bool frontBuffer)$/;"	f
+writePGM	robot.cpp	/^void writePGM(char* filename, GLubyte* buffer, int width, int height, bool raw=true)$/;"	f
+writePPM	robot.cpp	/^void writePPM(char* filename, GLubyte* buffer, int width, int height, bool raw=true)$/;"	f
+~Keyframe	keyframe.h	/^	virtual ~Keyframe() {}$/;"	f	class:Keyframe
+~Timer	timer.h	/^	virtual ~Timer() {}$/;"	f	class:Timer
+~Vector	vector.cpp	/^Vector::~Vector()$/;"	f	class:Vector

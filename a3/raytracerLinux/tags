@@ -1,0 +1,194 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+CC	Makefile	/^CC = g++$/;"	m
+CFLAGS	Makefile	/^CFLAGS = -g -O2 $/;"	m
+Colour	util.cpp	/^Colour::Colour() {$/;"	f	class:Colour
+Colour	util.cpp	/^Colour::Colour(const Colour& other) {$/;"	f	class:Colour
+Colour	util.cpp	/^Colour::Colour(double r, double g, double b) { $/;"	f	class:Colour
+Colour	util.h	/^class Colour {$/;"	c
+Intersection	util.h	/^struct Intersection {$/;"	s
+LIBS	Makefile	/^LIBS = -lm$/;"	m
+LightListNode	raytracer.h	/^	LightListNode( LightSource* light, LightListNode* next = NULL ) : $/;"	f	struct:LightListNode
+LightListNode	raytracer.h	/^	LightListNode() : light(NULL), next(NULL) {}$/;"	f	struct:LightListNode
+LightListNode	raytracer.h	/^struct LightListNode {$/;"	s
+LightSource	light_source.h	/^class LightSource {$/;"	c
+M_PI	util.h	20;"	d
+Material	util.h	/^	Material( Colour ambient, Colour diffuse, Colour specular, double exp ) :$/;"	f	struct:Material
+Material	util.h	/^struct Material {$/;"	s
+Matrix4x4	util.cpp	/^Matrix4x4::Matrix4x4() {$/;"	f	class:Matrix4x4
+Matrix4x4	util.cpp	/^Matrix4x4::Matrix4x4(const Matrix4x4& other) {$/;"	f	class:Matrix4x4
+Matrix4x4	util.h	/^class Matrix4x4 {$/;"	c
+Point3D	util.cpp	/^Point3D::Point3D() {$/;"	f	class:Point3D
+Point3D	util.cpp	/^Point3D::Point3D(const Point3D& other) {$/;"	f	class:Point3D
+Point3D	util.cpp	/^Point3D::Point3D(double x, double y, double z) { $/;"	f	class:Point3D
+Point3D	util.h	/^class Point3D {$/;"	c
+PointLight	light_source.h	/^	PointLight( Point3D pos, Colour ambient, Colour diffuse, Colour specular ) $/;"	f	class:PointLight
+PointLight	light_source.h	/^	PointLight( Point3D pos, Colour col ) : _pos(pos), _col_ambient(col), $/;"	f	class:PointLight
+PointLight	light_source.h	/^class PointLight : public LightSource {$/;"	c
+Ray3D	util.h	/^	Ray3D( Point3D p, Vector3D v ) : origin(p), dir(v) {$/;"	f	struct:Ray3D
+Ray3D	util.h	/^	Ray3D() {$/;"	f	struct:Ray3D
+Ray3D	util.h	/^struct Ray3D {$/;"	s
+Raytracer	raytracer.cpp	/^Raytracer::Raytracer() : _lightSource(NULL) {$/;"	f	class:Raytracer
+Raytracer	raytracer.h	/^class Raytracer {$/;"	c
+SceneDagNode	raytracer.h	/^	SceneDagNode( SceneObject* obj, Material* mat ) : $/;"	f	struct:SceneDagNode
+SceneDagNode	raytracer.h	/^	SceneDagNode() : $/;"	f	struct:SceneDagNode
+SceneDagNode	raytracer.h	/^struct SceneDagNode {$/;"	s
+SceneObject	scene_object.h	/^class SceneObject {$/;"	c
+UnitSphere	scene_object.h	/^class UnitSphere : public SceneObject {$/;"	c
+UnitSquare	scene_object.h	/^class UnitSquare : public SceneObject {$/;"	c
+VERBOSE	bmp_io.cpp	1504;"	d	file:
+VERBOSE	bmp_io.cpp	1665;"	d	file:
+VERBOSE	bmp_io.cpp	1927;"	d	file:
+VERBOSE	bmp_io.cpp	1972;"	d	file:
+VERBOSE	bmp_io.cpp	2159;"	d	file:
+VERBOSE	bmp_io.cpp	2217;"	d	file:
+VERBOSE	bmp_io.cpp	2408;"	d	file:
+VERBOSE	bmp_io.cpp	2500;"	d	file:
+Vector3D	util.cpp	/^Vector3D::Vector3D() {$/;"	f	class:Vector3D
+Vector3D	util.cpp	/^Vector3D::Vector3D(const Vector3D& other) {$/;"	f	class:Vector3D
+Vector3D	util.cpp	/^Vector3D::Vector3D(double x, double y, double z) { $/;"	f	class:Vector3D
+Vector3D	util.h	/^class Vector3D {$/;"	c
+Vector4D	util.cpp	/^Vector4D::Vector4D() {$/;"	f	class:Vector4D
+Vector4D	util.cpp	/^Vector4D::Vector4D(const Vector4D& other) {$/;"	f	class:Vector4D
+Vector4D	util.cpp	/^Vector4D::Vector4D(double w, double x, double y, double z) { $/;"	f	class:Vector4D
+Vector4D	util.h	/^class Vector4D {$/;"	c
+_BMP_IO_H_	bmp_io.h	2;"	d
+_UTIL_	util.h	14;"	d
+_bbuffer	raytracer.h	/^	unsigned char* _bbuffer;$/;"	m	class:Raytracer
+_col_ambient	light_source.h	/^	Colour _col_ambient;$/;"	m	class:PointLight
+_col_diffuse	light_source.h	/^	Colour _col_diffuse; $/;"	m	class:PointLight
+_col_specular	light_source.h	/^	Colour _col_specular; $/;"	m	class:PointLight
+_gbuffer	raytracer.h	/^	unsigned char* _gbuffer;$/;"	m	class:Raytracer
+_lightSource	raytracer.h	/^	LightListNode *_lightSource;$/;"	m	class:Raytracer
+_modelToWorld	raytracer.h	/^	Matrix4x4 _modelToWorld;$/;"	m	class:Raytracer
+_pos	light_source.h	/^	Point3D _pos;$/;"	m	class:PointLight
+_rbuffer	raytracer.h	/^	unsigned char* _rbuffer;$/;"	m	class:Raytracer
+_root	raytracer.h	/^	SceneDagNode *_root;$/;"	m	class:Raytracer
+_scrHeight	raytracer.h	/^	int _scrHeight;$/;"	m	class:Raytracer
+_scrWidth	raytracer.h	/^	int _scrWidth;$/;"	m	class:Raytracer
+_worldToModel	raytracer.h	/^	Matrix4x4 _worldToModel;$/;"	m	class:Raytracer
+addLightSource	raytracer.cpp	/^LightListNode* Raytracer::addLightSource( LightSource* light ) {$/;"	f	class:Raytracer
+addObject	raytracer.cpp	/^SceneDagNode* Raytracer::addObject( SceneDagNode* parent, $/;"	f	class:Raytracer
+addObject	raytracer.h	/^	SceneDagNode* addObject( SceneObject* obj, Material* mat ) {$/;"	f	class:Raytracer
+ambient	util.h	/^	Colour ambient; $/;"	m	struct:Material
+bmp_08_data_read	bmp_io.cpp	/^bool bmp_08_data_read ( ifstream &file_in, unsigned long int width, long int height, $/;"	f
+bmp_08_data_write	bmp_io.cpp	/^void bmp_08_data_write ( ofstream &file_out, unsigned long int width, $/;"	f
+bmp_08_write	bmp_io.cpp	/^bool bmp_08_write ( char *file_out_name, unsigned long int width, long int height, $/;"	f
+bmp_08_write_test	bmp_io.cpp	/^bool bmp_08_write_test ( char *file_out_name )$/;"	f
+bmp_24_data_read	bmp_io.cpp	/^bool bmp_24_data_read ( ifstream &file_in, unsigned long int width, long int height, $/;"	f
+bmp_24_data_write	bmp_io.cpp	/^void bmp_24_data_write ( ofstream &file_out, unsigned long int width, $/;"	f
+bmp_24_write	bmp_io.cpp	/^bool bmp_24_write ( char *file_out_name, unsigned long int width, long int height, $/;"	f
+bmp_24_write_test	bmp_io.cpp	/^bool bmp_24_write_test ( char *file_out_name )$/;"	f
+bmp_byte_swap	bmp_io.cpp	/^static bool bmp_byte_swap = true;$/;"	v	file:
+bmp_byte_swap_get	bmp_io.cpp	/^bool bmp_byte_swap_get ( void )$/;"	f
+bmp_byte_swap_set	bmp_io.cpp	/^void bmp_byte_swap_set ( bool value )$/;"	f
+bmp_header1_print	bmp_io.cpp	/^void bmp_header1_print ( unsigned short int filetype, $/;"	f
+bmp_header1_read	bmp_io.cpp	/^bool bmp_header1_read ( ifstream &file_in, unsigned short int *filetype, $/;"	f
+bmp_header1_write	bmp_io.cpp	/^void bmp_header1_write ( ofstream &file_out, unsigned short int filetype,$/;"	f
+bmp_header2_print	bmp_io.cpp	/^void bmp_header2_print ( unsigned long int size, unsigned long int width, $/;"	f
+bmp_header2_read	bmp_io.cpp	/^bool bmp_header2_read ( ifstream &file_in, unsigned long int *size,$/;"	f
+bmp_header2_write	bmp_io.cpp	/^void bmp_header2_write ( ofstream &file_out, unsigned long int size,$/;"	f
+bmp_palette_print	bmp_io.cpp	/^void bmp_palette_print ( unsigned long int colorsused, $/;"	f
+bmp_palette_read	bmp_io.cpp	/^bool bmp_palette_read ( ifstream &file_in, unsigned long int colorsused,$/;"	f
+bmp_palette_write	bmp_io.cpp	/^void bmp_palette_write ( ofstream &file_out, unsigned long int colorsused, $/;"	f
+bmp_print_test	bmp_io.cpp	/^bool bmp_print_test ( char *file_in_name )$/;"	f
+bmp_read	bmp_io.cpp	/^bool bmp_read ( char *file_in_name, unsigned long int *width, long int *height, $/;"	f
+bmp_read_test	bmp_io.cpp	/^bool bmp_read_test ( char *file_in_name )$/;"	f
+bmp_write	bmp_io.cpp	/^bool bmp_write ( char *file_out_name, unsigned long int width, long int height, $/;"	f
+child	raytracer.h	/^	SceneDagNode* child;$/;"	m	struct:SceneDagNode
+clamp	util.cpp	/^void Colour::clamp() {$/;"	f	class:Colour
+col	util.h	/^	Colour col;$/;"	m	struct:Ray3D
+computeShading	raytracer.cpp	/^void Raytracer::computeShading( Ray3D& ray ) {$/;"	f	class:Raytracer
+cross	util.cpp	/^Vector3D Vector3D::cross(const Vector3D& other) const$/;"	f	class:Vector3D
+cross	util.cpp	/^Vector3D cross(const Vector3D& u, const Vector3D& v) $/;"	f
+diffuse	util.h	/^	Colour diffuse;$/;"	m	struct:Material
+dir	util.h	/^	Vector3D dir;$/;"	m	struct:Ray3D
+dot	util.cpp	/^double Vector3D::dot(const Vector3D& other) const$/;"	f	class:Vector3D
+flushPixelBuffer	raytracer.cpp	/^void Raytracer::flushPixelBuffer( char *file_name ) {$/;"	f	class:Raytracer
+getColumn	util.cpp	/^Vector4D Matrix4x4::getColumn(int col) const {$/;"	f	class:Matrix4x4
+getRow	util.cpp	/^Vector4D Matrix4x4::getRow(int row) const {$/;"	f	class:Matrix4x4
+getRow	util.cpp	/^double* Matrix4x4::getRow(int row) {$/;"	f	class:Matrix4x4
+get_position	light_source.h	/^	Point3D get_position() const { return _pos; }$/;"	f	class:PointLight
+initInvViewMatrix	raytracer.cpp	/^Matrix4x4 Raytracer::initInvViewMatrix( Point3D eye, Vector3D view, $/;"	f	class:Raytracer
+initPixelBuffer	raytracer.cpp	/^void Raytracer::initPixelBuffer() {$/;"	f	class:Raytracer
+intersect	scene_object.cpp	/^bool UnitSphere::intersect( Ray3D& ray, const Matrix4x4& worldToModel,$/;"	f	class:UnitSphere
+intersect	scene_object.cpp	/^bool UnitSquare::intersect( Ray3D& ray, const Matrix4x4& worldToModel,$/;"	f	class:UnitSquare
+intersection	util.h	/^	Intersection intersection;$/;"	m	struct:Ray3D
+invtrans	raytracer.h	/^	Matrix4x4 invtrans;$/;"	m	struct:SceneDagNode
+length	util.cpp	/^double Vector3D::length() const$/;"	f	class:Vector3D
+light	raytracer.h	/^	LightSource* light;$/;"	m	struct:LightListNode
+long_int_read	bmp_io.cpp	/^bool long_int_read ( long int *long_int_val, ifstream &file_in )$/;"	f
+long_int_write	bmp_io.cpp	/^void long_int_write ( long int long_int_val, ofstream &file_out )$/;"	f
+m_data	util.h	/^	double m_data[3];$/;"	m	class:Colour
+m_data	util.h	/^	double m_data[3];$/;"	m	class:Point3D
+m_data	util.h	/^	double m_data[3];$/;"	m	class:Vector3D
+m_data	util.h	/^	double m_data[4];$/;"	m	class:Vector4D
+m_data	util.h	/^  double m_data[16];$/;"	m	class:Matrix4x4
+main	raytracer.cpp	/^int main(int argc, char* argv[])$/;"	f
+mat	raytracer.h	/^	Material* mat;$/;"	m	struct:SceneDagNode
+mat	util.h	/^	Material* mat;$/;"	m	struct:Intersection
+next	raytracer.h	/^	LightListNode* next;$/;"	m	struct:LightListNode
+next	raytracer.h	/^	SceneDagNode* next;$/;"	m	struct:SceneDagNode
+none	util.h	/^	bool none;$/;"	m	struct:Intersection
+normal	util.h	/^	Vector3D normal;$/;"	m	struct:Intersection
+normalize	util.cpp	/^double Vector3D::normalize() {$/;"	f	class:Vector3D
+obj	raytracer.h	/^	SceneObject* obj;$/;"	m	struct:SceneDagNode
+operator *	util.cpp	/^Colour Colour::operator *(const Colour& other) {$/;"	f	class:Colour
+operator *	util.cpp	/^Colour operator *(double s, const Colour& c)$/;"	f
+operator *	util.cpp	/^Matrix4x4 operator *(const Matrix4x4& a, const Matrix4x4& b) {$/;"	f
+operator *	util.cpp	/^Point3D operator *(const Matrix4x4& M, const Point3D& p) {$/;"	f
+operator *	util.cpp	/^Vector3D operator *(const Matrix4x4& M, const Vector3D& v) {$/;"	f
+operator *	util.cpp	/^Vector3D operator *(double s, const Vector3D& v)$/;"	f
+operator +	util.cpp	/^Colour operator +(const Colour& u, const Colour& v)$/;"	f
+operator +	util.cpp	/^Point3D operator +(const Point3D& u, const Vector3D& v)$/;"	f
+operator +	util.cpp	/^Vector3D operator +(const Vector3D& u, const Vector3D& v)$/;"	f
+operator -	util.cpp	/^Point3D operator -(const Point3D& u, const Vector3D& v)$/;"	f
+operator -	util.cpp	/^Vector3D operator -(const Point3D& u, const Point3D& v)$/;"	f
+operator -	util.cpp	/^Vector3D operator -(const Vector3D& u)$/;"	f
+operator -	util.cpp	/^Vector3D operator -(const Vector3D& u, const Vector3D& v)$/;"	f
+operator <<	util.cpp	/^std::ostream& operator <<(std::ostream& os, const Matrix4x4& M) {$/;"	f
+operator <<	util.cpp	/^std::ostream& operator <<(std::ostream& s, const Colour& c)$/;"	f
+operator <<	util.cpp	/^std::ostream& operator <<(std::ostream& s, const Point3D& p)$/;"	f
+operator <<	util.cpp	/^std::ostream& operator <<(std::ostream& s, const Vector3D& v)$/;"	f
+operator =	util.cpp	/^Colour& Colour::operator =(const Colour& other) {$/;"	f	class:Colour
+operator =	util.cpp	/^Matrix4x4& Matrix4x4::operator=(const Matrix4x4& other) {$/;"	f	class:Matrix4x4
+operator =	util.cpp	/^Point3D& Point3D::operator =(const Point3D& other) {$/;"	f	class:Point3D
+operator =	util.cpp	/^Vector3D& Vector3D::operator =(const Vector3D& other) {$/;"	f	class:Vector3D
+operator =	util.cpp	/^Vector4D& Vector4D::operator =(const Vector4D& other) {$/;"	f	class:Vector4D
+operator []	util.cpp	/^Vector4D Matrix4x4::operator[](int row) const {$/;"	f	class:Matrix4x4
+operator []	util.cpp	/^double Colour::operator[](int i) const {$/;"	f	class:Colour
+operator []	util.cpp	/^double Point3D::operator[](int i) const {$/;"	f	class:Point3D
+operator []	util.cpp	/^double Vector3D::operator[](int i) const {$/;"	f	class:Vector3D
+operator []	util.cpp	/^double Vector4D::operator[](int i) const {$/;"	f	class:Vector4D
+operator []	util.cpp	/^double& Colour::operator[](int i) {$/;"	f	class:Colour
+operator []	util.cpp	/^double& Point3D::operator[](int i) {$/;"	f	class:Point3D
+operator []	util.cpp	/^double& Vector3D::operator[](int i) {$/;"	f	class:Vector3D
+operator []	util.cpp	/^double& Vector4D::operator[](int i) {$/;"	f	class:Vector4D
+operator []	util.cpp	/^double* Matrix4x4::operator[](int row) {$/;"	f	class:Matrix4x4
+origin	util.h	/^	Point3D origin;$/;"	m	struct:Ray3D
+parent	raytracer.h	/^	SceneDagNode* parent;$/;"	m	struct:SceneDagNode
+point	util.h	/^	Point3D point;$/;"	m	struct:Intersection
+render	raytracer.cpp	/^void Raytracer::render( int width, int height, Point3D eye, Vector3D view, $/;"	f	class:Raytracer
+rotate	raytracer.cpp	/^void Raytracer::rotate( SceneDagNode* node, char axis, double angle ) {$/;"	f	class:Raytracer
+scale	raytracer.cpp	/^void Raytracer::scale( SceneDagNode* node, Point3D origin, double factor[3] ) {$/;"	f	class:Raytracer
+shade	light_source.cpp	/^void PointLight::shade( Ray3D& ray ) {$/;"	f	class:PointLight
+shadeRay	raytracer.cpp	/^Colour Raytracer::shadeRay( Ray3D& ray ) {$/;"	f	class:Raytracer
+specular	util.h	/^	Colour specular;$/;"	m	struct:Material
+specular_exp	util.h	/^	double specular_exp;$/;"	m	struct:Material
+t_value	util.h	/^	double t_value;	$/;"	m	struct:Intersection
+trans	raytracer.h	/^	Matrix4x4 trans;$/;"	m	struct:SceneDagNode
+transNorm	util.cpp	/^Vector3D transNorm(const Matrix4x4& M, const Vector3D& n) {$/;"	f
+translate	raytracer.cpp	/^void Raytracer::translate( SceneDagNode* node, Vector3D trans ) {$/;"	f	class:Raytracer
+transpose	util.cpp	/^Matrix4x4 Matrix4x4::transpose() const {$/;"	f	class:Matrix4x4
+traverseScene	raytracer.cpp	/^void Raytracer::traverseScene( SceneDagNode* node, Ray3D& ray ) {$/;"	f	class:Raytracer
+u_long_int_read	bmp_io.cpp	/^bool u_long_int_read ( unsigned long int *u_long_int_val, $/;"	f
+u_long_int_write	bmp_io.cpp	/^void u_long_int_write ( unsigned long int u_long_int_val, $/;"	f
+u_short_int_read	bmp_io.cpp	/^bool u_short_int_read ( unsigned short int *u_short_int_val, $/;"	f
+u_short_int_write	bmp_io.cpp	/^void u_short_int_write ( unsigned short int u_short_int_val, $/;"	f
+~LightListNode	raytracer.h	/^	~LightListNode() { $/;"	f	struct:LightListNode
+~Raytracer	raytracer.cpp	/^Raytracer::~Raytracer() {$/;"	f	class:Raytracer
+~SceneDagNode	raytracer.h	/^	~SceneDagNode() {$/;"	f	struct:SceneDagNode
