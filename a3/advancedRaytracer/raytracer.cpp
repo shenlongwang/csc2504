@@ -25,7 +25,7 @@
 
 // #define DEPTH_OF_FIELD
 // #define GLOSS
-// #define SOFT_SHADOW
+#define SOFT_SHADOW
 #define ANTI_ALIASING
 
 #define REFLECTION
@@ -205,8 +205,8 @@ void Raytracer::computeShading( Ray3D& ray ) {
         Ray3D rayLight;
         Colour raySoftShadowColour;
 #ifdef SOFT_SHADOW
-        double light_size = 2.0;
-        int soft_size = 10;
+        double light_size = 1.0;
+        int soft_size = 220;
 #else
         double light_size = 0.0;
         int soft_size = 1;
@@ -314,31 +314,44 @@ Colour Raytracer::shadeRay( Ray3D& ray ) {
 	// anything.
 	if (!ray.intersection.none) {
 #ifdef REFLECTION
-        double reflect_rate = 0.9;
-        if (ray.intersection.mat->specular_exp > 0)
+        if (ray.intersection.mat->specular_exp > 0 && ray.intersection.mat->reflect > 0)
         {
             Ray3D reflect_ray;
+            double reflect_rate = ray.intersection.mat->reflect;
             Vector3D reflect_v = ray.intersection.point - ray.origin;
             reflect_v.normalize();
+            ray.intersection.normal.normalize();
             reflect_ray.dir = reflect_v - 2*((reflect_v.dot(ray.intersection.normal))*ray.intersection.normal);
-            reflect_ray.dir.normalize();
+            // reflect_ray.dir.normalize();
             reflect_ray.origin = ray.intersection.point+0.001*reflect_ray.dir;
 	        traverseScene(_root, reflect_ray); 
 	        if (!reflect_ray.intersection.none) {
                 computeShading(reflect_ray);
 		        computeShading(ray); 
-		        col = ray.col+reflect_rate*ray.intersection.mat->specular*reflect_ray.col;
+		        ray.col = ray.col+reflect_rate*ray.intersection.mat->specular*reflect_ray.col;
+                ray.col.clamp();
+                col = ray.col;
+                return col;
+            }
+            else
+            {
+                computeShading(ray); 
+                col = ray.col;
                 col.clamp();
                 return col;
             }
 	    }
-        computeShading(ray); 
-        col = ray.col;
+        else 
+        {
+            computeShading(ray); 
+            col = ray.col;
+            col.clamp();
+            return col;
+        }
 #else
 		computeShading(ray); 
         col = ray.col;
 #endif
-        // std::cout<<col<<std::endl;
 	}
 
 	// You'll want to call shadeRay recursively (with a different ray, 
@@ -428,7 +441,10 @@ void Raytracer::render( int width, int height, Point3D eye, Vector3D view,
             _rbuffer[i*width+j] = int(col[0]*255);
 		    _gbuffer[i*width+j] = int(col[1]*255);
 		    _bbuffer[i*width+j] = int(col[2]*255);
+            std::cout<< "\r Rendering pixel("<<i<<", "<<j<<")...";
 		}
+        if (i%10 == 0)
+            std::cout<<"Rendering "<<i<<"th Row..."<<std::endl;
 	}
 	flushPixelBuffer(fileName);
 }
@@ -454,32 +470,35 @@ int main(int argc, char* argv[])
 	// Defines a material for shading.
 	Material gold( Colour(0.3, 0.3, 0.3), Colour(0.75164, 0.60648, 0.22648), 
 			Colour(0.628281, 0.555802, 0.366065), 
-			51.2 );
+			51.2, 1.0, 0.0 );
 	Material jade( Colour(0, 0, 0), Colour(0.54, 0.89, 0.63), 
 			Colour(0.316228, 0.316228, 0.316228), 
-			12.8 );
+			12.8, 0.5, 0.0  );
 	Material red( Colour(0.0, 0.0, 0.0), Colour(0.9, 0.3, 0.3), 
 			Colour(0.316228, 0.316228, 0.316228), 
-			12.8 );
+			12.8, 0.5, 0.0  );
 	Material yellow( Colour(0.0, 0.0, 0.0), Colour(0.9, 0.9, 0.0), 
-			Colour(0.616228, 0.616228, 0.316228), 
-			12.8 );
+			Colour(0.316228, 0.316228, 0.316228), 
+			12.8, 0.5, 0.0  );
 	Material green( Colour(0.0, 0.0, 0.0), Colour(0.3, 0.9, 0.3), 
-			Colour(0.316228, 0.716228, 0.316228), 
-			12.8 );
+			Colour(0.316228, 0.316228, 0.316228), 
+			12.8, 0.5, 0.0  );
 	Material cyan( Colour(0.0, 0.0, 0.0), Colour(0.9, 0.0, 0.9), 
-			Colour(0.616228, 0.316228, 0.616228), 
-			12.8 );
+			Colour(0.316228, 0.316228, 0.316228), 
+			12.8, 0.5, 0.0  );
 	Material blue( Colour(0.0, 0.0, 0.0), Colour(0.3, 0.3, 0.9), 
 			Colour(0.316228, 0.316228, 0.616228), 
-			52.8 );
+			52.8, 1.0, 0.0  );
 	Material black( Colour(0.0, 0.0, 0.0), Colour(0.4, 0.4, 0.4), 
 			Colour(0.316228, 0.316228, 0.316228), 
-			52.8 );
+			52.8, 1.0, 0.0  );
+	Material mirror( Colour(0.0, 0.0, 0.0), Colour(0.0, 0.0, 0.0), 
+			Colour(0.8, 0.8, 0.8), 
+			12.8, 1.0, 0.0  );
 
 	// Defines a point light source.
 	raytracer.addLightSource( new PointLight(Point3D(0, 0, 5), 
-				Colour(0.4, 0.4, 0.4) ) );
+				Colour(0.6, 0.6, 0.6) ) );
 	raytracer.addLightSource( new PointLight(Point3D(-4, -4, 4), 
 				Colour(0.4, 0.4, 0.4) ) );
 	raytracer.addLightSource( new PointLight(Point3D(4, 4, 4), 
@@ -488,7 +507,7 @@ int main(int argc, char* argv[])
 	// Add a unit square into the scene with material mat.
 	SceneDagNode* plane_right = raytracer.addObject( new UnitSquare(), &red );
 	SceneDagNode* plane_up = raytracer.addObject( new UnitSquare(), &yellow );
-	SceneDagNode* plane_left = raytracer.addObject( new UnitSquare(), &cyan);
+	SceneDagNode* plane_left = raytracer.addObject( new UnitSquare(), &mirror);
 	SceneDagNode* plane_down = raytracer.addObject( new UnitSquare(), &green );
 	SceneDagNode* plane = raytracer.addObject( new UnitSquare(), &jade );
 	SceneDagNode* sphere = raytracer.addObject( new UnitSphere(), &gold );

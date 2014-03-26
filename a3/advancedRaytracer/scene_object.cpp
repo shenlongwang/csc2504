@@ -96,7 +96,9 @@ bool UnitSquare::intersect( Ray3D& ray, const Matrix4x4& worldToModel,
       Vector3D v_n(0.0, 0.0, 1.0);
       v_n.normalize();
       ray.intersection.point = modelToWorld * p_i;
+      // ray.intersection.normal = transNorm(modelToWorld, v_n); 
       ray.intersection.normal = transNorm(worldToModel, v_n); 
+      ray.intersection.normal.normalize(); 
       ray.intersection.none = false;
       ray.intersection.t_value = t;
       return true;
