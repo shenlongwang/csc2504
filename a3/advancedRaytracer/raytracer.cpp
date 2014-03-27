@@ -21,15 +21,19 @@
 
 #define SHADOW true 
 #define PHONG false 
+#define DEPTH 4
 
 
-// #define DEPTH_OF_FIELD
+// #define SCENE1
+#define SCENE2
+
+#define DEPTH_OF_FIELD
 // #define GLOSS
-#define SOFT_SHADOW
-#define ANTI_ALIASING
+// #define SOFT_SHADOW
+// #define ANTI_ALIASING
 
 #define REFLECTION
-// #define REFRACTION 
+#define REFRACTION 
 Raytracer::Raytracer() : _lightSource(NULL) {
 	_root = new SceneDagNode();
 }
@@ -205,8 +209,8 @@ void Raytracer::computeShading( Ray3D& ray ) {
         Ray3D rayLight;
         Colour raySoftShadowColour;
 #ifdef SOFT_SHADOW
-        double light_size = 1.0;
-        int soft_size = 220;
+        double light_size = 0.5;
+        int soft_size = 20;
 #else
         double light_size = 0.0;
         int soft_size = 1;
@@ -306,58 +310,154 @@ void Raytracer::flushPixelBuffer( char *file_name ) {
 	delete _bbuffer;
 }
 
-Colour Raytracer::shadeRay( Ray3D& ray ) {
+Colour Raytracer::shadeRay( Ray3D& ray, int depth ) {
 	Colour col(0.0, 0.0, 0.0); 
+	Colour col_reflect(0.0, 0.0, 0.0); 
+	Colour col_refract(0.0, 0.0, 0.0); 
 	traverseScene(_root, ray); 
 	
 	// Don't bother shading if the ray didn't hit 
 	// anything.
-	if (!ray.intersection.none) {
-#ifdef REFLECTION
-        if (ray.intersection.mat->specular_exp > 0 && ray.intersection.mat->reflect > 0)
-        {
-            Ray3D reflect_ray;
+//*  	if (!ray.intersection.none) {
+//*  #ifdef REFLECTION
+//*          if (ray.intersection.mat->specular_exp > 0 && ray.intersection.mat->reflect > 0)
+//*          {
+//*              Ray3D reflect_ray;
+//*              double reflect_rate = ray.intersection.mat->reflect;
+//*              Vector3D reflect_v = ray.intersection.point - ray.origin;
+//*              reflect_v.normalize();
+//*              ray.intersection.normal.normalize();
+//*              reflect_ray.dir = reflect_v - 2*((reflect_v.dot(ray.intersection.normal))*ray.intersection.normal);
+//*              // reflect_ray.dir.normalize();
+//*              reflect_ray.origin = ray.intersection.point+0.001*reflect_ray.dir;
+//*  	        traverseScene(_root, reflect_ray); 
+//*  	        if (!reflect_ray.intersection.none) {
+//*                  computeShading(reflect_ray);
+//*  		        computeShading(ray); 
+//*  		        ray.col = ray.col+reflect_rate*ray.intersection.mat->specular*reflect_ray.col;
+//*                  ray.col.clamp();
+//*                  col = ray.col;
+//*                  return col;
+//*              }
+//*              else
+//*              {
+//*                  computeShading(ray); 
+//*                  col = ray.col;
+//*                  col.clamp();
+//*                  return col;
+//*              }
+//*  	    }
+//*          else 
+//*          {
+//*              computeShading(ray); 
+//*              col = ray.col;
+//*              col.clamp();
+//*              return col;
+//*          }
+//*  #else
+//*  		computeShading(ray); 
+//*          col = ray.col;
+//*  #endif
+//*  	}
+//*  
+//*  	// You'll want to call shadeRay recursively (with a different ray, 
+//*  	// of course) here to implement reflection/refraction effects.  
+//*  
+//*  	return col; 
+   	if ((!ray.intersection.none) && (depth != 0)) {
+    #ifdef REFLECTION
             double reflect_rate = ray.intersection.mat->reflect;
-            Vector3D reflect_v = ray.intersection.point - ray.origin;
-            reflect_v.normalize();
-            ray.intersection.normal.normalize();
-            reflect_ray.dir = reflect_v - 2*((reflect_v.dot(ray.intersection.normal))*ray.intersection.normal);
-            // reflect_ray.dir.normalize();
-            reflect_ray.origin = ray.intersection.point+0.001*reflect_ray.dir;
-	        traverseScene(_root, reflect_ray); 
-	        if (!reflect_ray.intersection.none) {
-                computeShading(reflect_ray);
-		        computeShading(ray); 
-		        ray.col = ray.col+reflect_rate*ray.intersection.mat->specular*reflect_ray.col;
-                ray.col.clamp();
-                col = ray.col;
-                return col;
-            }
-            else
+            if (ray.intersection.mat->specular_exp > 0 && reflect_rate > 0)
             {
-                computeShading(ray); 
-                col = ray.col;
-                col.clamp();
-                return col;
+                Ray3D reflect_ray;
+                Vector3D reflect_v = ray.intersection.point - ray.origin;
+                reflect_v.normalize();
+                ray.intersection.normal.normalize();
+                reflect_ray.dir = reflect_v - 2*((reflect_v.dot(ray.intersection.normal))*ray.intersection.normal);
+                reflect_ray.dir.normalize();
+                reflect_ray.origin = ray.intersection.point+0.001*reflect_ray.dir;
+                col_reflect = shadeRay(reflect_ray, depth - 1);
             }
-	    }
-        else 
-        {
-            computeShading(ray); 
+    #endif
+    #ifdef REFRACTION
+            if ( ray.intersection.mat->refract > 0)
+            {
+                Vector3D refract_d = ray.intersection.point - ray.origin;
+                refract_d.normalize();
+                Vector3D refract_n = ray.intersection.normal;
+                refract_n.normalize();
+                double n_div_nt = 1/ray.intersection.mat->refract_ind;
+                double d_dot_n = refract_d.dot(refract_n);
+                double c = -d_dot_n;
+                double cost2 = 1 - pow(n_div_nt,2)*(1-pow(d_dot_n,2));
+                if (cost2 > 0.0) {
+                    Ray3D refract_ray;
+                    Vector3D refract_t = n_div_nt * refract_d + (n_div_nt * c - sqrt(cost2)) * refract_n;
+                    refract_ray.dir = refract_t;
+                    refract_ray.origin = ray.intersection.point+0.0001*refract_ray.dir;
+                    col_refract = shadeRay(refract_ray, depth - 1);
+                    col_refract.clamp();
+                }
+                
+// Comment at 08:01 pm Mar 26;                
+//                  if (d_dot_n < 0) {
+//                      refract_d.normalize();
+//                      refract_n.normalize();
+//                      Vector3D refract_t1 = n_div_nt*(refract_d - d_dot_n*refract_n);
+//                      Vector3D refract_t2 = sqrt(1 - pow(n_div_nt,2)*(1-pow(d_dot_n,2)));
+//                      Vector3D refract_t = refract_t1 + refract_t2;
+//                      refract_ray.dir = refract_t;
+//                      refract_ray.origin = ray.intersection.point+0.0001*refract_ray.dir;
+//                  }
+//                  else {
+//                      double n_div_nt = ray.intersection.mat->refractive_ind;
+//                      refract_d.normalize();
+//                      refract_n = -refract_n;
+//                      refract_n.normalize();
+//                      Vector3D refract_t1 = n_div_nt*(refract_d - d_dot_n*refract_n);
+//                      Vector3D refract_t2 = sqrt(1 - pow(n_div_nt,2)*(1-pow(d_dot_n,2)));
+//                      Vector3D refract_t = refract_t1 + refract_t2;
+//                      refract_ray.dir = refract_t;
+//                      refract_ray.origin = ray.intersection.point+0.0001*refract_ray.dir;
+//                      if (!refract_ray.intersection.none)
+//                          c = refract_t.dot(-refract_n);
+//                      else {
+//                          ray.col = refract_col * col_reflect;
+//                          ray.col.clamp();
+//                          return ray.col;
+//                      }
+//                  }
+//                  double R_0 = (refract_n - 1)^2 / (refract_n + 1)^2;
+//                  double R = R_0 + (1 - R_0) * (1 - c)^5;
+//                  computeShading(refract_ray, depth - 1);
+//      		    col_refract = R*refract_ray.col;
+//                  col_refract.clamp();
+//                  }
+            }
+    
+    #endif
+    		computeShading(ray);
+    #ifdef REFLECTION
+            ray.col = ray.col + reflect_rate*ray.intersection.mat->specular*col_reflect;
+    #endif
+    #ifdef REFRACTION
+            ray.col = ray.col + col_refract;
+    #endif
+            ray.col.clamp();
+            col = ray.col;
+            return col;
+    	}
+    
+        if ((!ray.intersection.none) && (depth == 0)) {
+    		computeShading(ray);
             col = ray.col;
             col.clamp();
             return col;
         }
-#else
-		computeShading(ray); 
-        col = ray.col;
-#endif
-	}
-
-	// You'll want to call shadeRay recursively (with a different ray, 
-	// of course) here to implement reflection/refraction effects.  
-
-	return col; 
+    	// You'll want to call shadeRay recursively (with a different ray, 
+    	// of course) here to implement reflection/refraction effects.  
+    
+    	return col; 
 }	
 
 void Raytracer::render( int width, int height, Point3D eye, Vector3D view, 
@@ -388,7 +488,7 @@ void Raytracer::render( int width, int height, Point3D eye, Vector3D view,
     double anti_step = 1.0/double(anti_size);
     double anti_weight = 1.0/double(anti_size*anti_size);
 #ifdef DEPTH_OF_FIELD
-    int dof_size = 50;
+    int dof_size = 40;
     double d_j = 0.0;
     double d_i = 0.0;
     double dof_mag = 1*1e-1;
@@ -428,14 +528,14 @@ void Raytracer::render( int width, int height, Point3D eye, Vector3D view,
                         ray.origin = viewToWorld * origin;
                         ray.dir = viewToWorld * imagePlane - ray.origin;
                         ray.dir.normalize();
-                        col_dof = col_dof + dof_weight*shadeRay(ray);
+                        col_dof = col_dof + dof_weight*shadeRay(ray, DEPTH);
                     }     
             		col = col + anti_weight*col_dof; 
 #else
                     ray.origin = viewToWorld * origin;
                     ray.dir = viewToWorld * imagePlane - ray.origin;
                     ray.dir.normalize();
-            		col = col + anti_weight*shadeRay(ray); 
+            		col = col + anti_weight*shadeRay(ray, 3); 
 #endif
                 }
             _rbuffer[i*width+j] = int(col[0]*255);
@@ -466,36 +566,39 @@ int main(int argc, char* argv[])
 	}
     time_t timer1, timer2;
     time(&timer1);
-
 	// Defines a material for shading.
 	Material gold( Colour(0.3, 0.3, 0.3), Colour(0.75164, 0.60648, 0.22648), 
 			Colour(0.628281, 0.555802, 0.366065), 
-			51.2, 1.0, 0.0 );
+			51.2, 1.0, 0.0, 0.0 );
 	Material jade( Colour(0, 0, 0), Colour(0.54, 0.89, 0.63), 
 			Colour(0.316228, 0.316228, 0.316228), 
-			12.8, 0.5, 0.0  );
+			12.8, 0.5, 0.0, 0.0  );
 	Material red( Colour(0.0, 0.0, 0.0), Colour(0.9, 0.3, 0.3), 
 			Colour(0.316228, 0.316228, 0.316228), 
-			12.8, 0.5, 0.0  );
+			12.8, 0.5, 0.0, 0.0  );
 	Material yellow( Colour(0.0, 0.0, 0.0), Colour(0.9, 0.9, 0.0), 
 			Colour(0.316228, 0.316228, 0.316228), 
-			12.8, 0.5, 0.0  );
+			12.8, 0.5, 0.0, 0.0  );
 	Material green( Colour(0.0, 0.0, 0.0), Colour(0.3, 0.9, 0.3), 
 			Colour(0.316228, 0.316228, 0.316228), 
-			12.8, 0.5, 0.0  );
+			12.8, 0.5, 0.0, 0.0  );
 	Material cyan( Colour(0.0, 0.0, 0.0), Colour(0.9, 0.0, 0.9), 
 			Colour(0.316228, 0.316228, 0.316228), 
-			12.8, 0.5, 0.0  );
+			12.8, 0.5, 0.0, 0.0  );
 	Material blue( Colour(0.0, 0.0, 0.0), Colour(0.3, 0.3, 0.9), 
 			Colour(0.316228, 0.316228, 0.616228), 
-			52.8, 1.0, 0.0  );
+			52.8, 1.0, 0.0, 0.0  );
 	Material black( Colour(0.0, 0.0, 0.0), Colour(0.4, 0.4, 0.4), 
 			Colour(0.316228, 0.316228, 0.316228), 
-			52.8, 1.0, 0.0  );
+			52.8, 1.0, 0.0, 0.0  );
 	Material mirror( Colour(0.0, 0.0, 0.0), Colour(0.0, 0.0, 0.0), 
 			Colour(0.8, 0.8, 0.8), 
-			12.8, 1.0, 0.0  );
+			12.8, 1.0, 0.0, 0.0  );
+	Material glass( Colour(0.0, 0.0, 0.0), Colour(0.4, 0.4, 0.4), 
+			Colour(0.8, 0.6, 0.8), 
+			52.8, 0.2, 1.0, 1.4 );
 
+#ifdef SCENE1
 	// Defines a point light source.
 	raytracer.addLightSource( new PointLight(Point3D(0, 0, 5), 
 				Colour(0.6, 0.6, 0.6) ) );
@@ -513,6 +616,7 @@ int main(int argc, char* argv[])
 	SceneDagNode* sphere = raytracer.addObject( new UnitSphere(), &gold );
 	SceneDagNode* sphere_2 = raytracer.addObject( new UnitSphere(), &blue );
 	SceneDagNode* sphere_3 = raytracer.addObject( new UnitSphere(), &black );
+	SceneDagNode* sphere_4 = raytracer.addObject( new UnitSphere(), &glass );
 	
 	// Apply some transformations to the unit square.
 	double factor1[3] = { 1.0, 2.0, 1.0 };
@@ -524,6 +628,7 @@ int main(int argc, char* argv[])
 
 	raytracer.translate(sphere_2, Vector3D(-4, -0, 2));	
 	raytracer.translate(sphere_3, Vector3D(3, 3, 4));	
+	raytracer.translate(sphere_4, Vector3D(0, 0, 9));	
 	
     raytracer.translate(plane, Vector3D(0, 0, -7));	
 	raytracer.rotate(plane, 'z', 45); 
@@ -567,6 +672,55 @@ int main(int argc, char* argv[])
 	time(&timer2);
     seconds = difftime(timer2, timer1);
     std::cout<<"Second image rendering finished. It takes "<<seconds<<" seconds."<<std::endl;
-	return 0;
+#endif	
+#ifdef SCENE2
+	// Defines a point light source.
+	raytracer.addLightSource( new PointLight(Point3D(-6, 8, 0), 
+				Colour(0.4, 0.4, 0.4) ) );
+	raytracer.addLightSource( new PointLight(Point3D(4, 8, 2), 
+				Colour(0.4, 0.4, 0.4) ) );
+
+	// Add a unit square into the scene with material mat.
+	SceneDagNode* plane = raytracer.addObject( new UnitSquare(), &gold );
+	// SceneDagNode* plane_2 = raytracer.addObject( new UnitSquare(), &glass );
+	SceneDagNode* sphere = raytracer.addObject( new UnitSphere(), &glass );
+	SceneDagNode* sphere_2 = raytracer.addObject( new UnitSphere(), &blue );
+	SceneDagNode* sphere_3 = raytracer.addObject( new UnitSphere(), &mirror );
+	
+	// Apply some transformations to the unit square.
+	double factor1[3] = { 3.0, 3.0, 3.0 };
+	double factor2[3] = { 32.0, 32.0, 32.0 };
+	raytracer.translate(sphere, Vector3D(-2, 4, -1));	
+	raytracer.translate(sphere_2, Vector3D(0, 2, 1));	
+	raytracer.translate(sphere_3, Vector3D(1, 6, -0.5));	
+
+	raytracer.rotate(plane, 'x', -90); 
+	raytracer.scale(plane, Point3D(0, 0, 0), factor2);
+	
+	// raytracer.translate(plane_2, Vector3D(0, 5, 0));	
+	// raytracer.rotate(plane_2, 'x', -90); 
+	// raytracer.scale(plane_2, Point3D(0, 0, 0), factor1);
+	
+    Vector3D up(0, 0, 1);
+	double fov = 20;
+	Point3D eye(0, 10, 0);
+	Vector3D view(0, -1, 0);
+    raytracer.render(width, height, eye, view, up, fov, "view1_scene2.bmp");
+	time(&timer2);
+	// Render it from a different point of view.
+    double seconds = difftime(timer2, timer1);
+    std::cout<<"First image rendering finished. It takes "<<seconds<<" seconds."<<std::endl;
+    timer1 = timer2;
+	double fov2 = 60;
+    Vector3D up2(0, 1, 3);
+	Point3D eye2(0, 8, -2);
+	Vector3D view2(0, -3, 1);
+	raytracer.render(width, height, eye2, view2, up2, fov2, "view2.bmp");
+	time(&timer2);
+    seconds = difftime(timer2, timer1);
+    std::cout<<"Second image rendering finished. It takes "<<seconds<<" seconds."<<std::endl;
+#endif	
+    
+    return 0;
 }
 
