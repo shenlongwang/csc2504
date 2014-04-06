@@ -49,7 +49,8 @@ struct SceneDagNode {
 	Material* mat;
 	// Each node maintains a transformation matrix, which maps the 
 	// geometry from object space to world space and the inverse.
-	Matrix4x4 trans;
+    
+    Matrix4x4 trans;
 	Matrix4x4 invtrans;
 	
 	// Internal structure of the tree, you shouldn't have to worry 
@@ -98,6 +99,8 @@ public:
 
 	// Apply scaling about a fixed point origin.
 	void scale( SceneDagNode* node, Point3D origin, double factor[3] );
+	// Apply scaling about a fixed point origin.
+	void scale2( SceneDagNode* node, Point3D origin, double factor);
     
 private:
 	// Allocates and initializes the pixel buffer for rendering, you

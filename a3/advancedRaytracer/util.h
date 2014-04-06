@@ -128,10 +128,39 @@ Colour operator *(double s, const Colour& c);
 Colour operator +(const Colour& u, const Colour& v); 
 std::ostream& operator <<(std::ostream& o, const Colour& c); 
 
+class Texture {
+public:
+    Texture();
+    ~Texture();
+	bool readImage(char *file_name);
+	Colour getColor(double uv[2]);
+	// Width and height of the viewport.
+	long unsigned int _texWidth;
+	long unsigned int _texHeight;
+private:
+
+	// Pixel buffer.
+	unsigned char* _rbuffer;
+	unsigned char* _gbuffer;
+	unsigned char* _bbuffer;
+	unsigned char* _transbuffer;
+
+};
+
 struct Material {
 	Material( Colour ambient, Colour diffuse, Colour specular, double exp, double reflect, double refract, double refract_ind ) :
 		ambient(ambient), diffuse(diffuse), specular(specular), 
-		specular_exp(exp), reflect(reflect), refract(refract), refract_ind(refract_ind) {}
+		specular_exp(exp), reflect(reflect), refract(refract), refract_ind(refract_ind) {
+        
+    texture_ind = false;
+    // transparent index;
+    transparent_ind = false;
+    // normal index;
+    normal_ind = false;
+    // motion index;
+    motion_ind = false;
+    motion_speed = 0;
+        }
 	
 	// Ambient components for Phong shading.
 	Colour ambient; 
@@ -141,12 +170,27 @@ struct Material {
 	Colour specular;
 	// Specular expoent.
 	double specular_exp;
-    double reflect;
     // reflective propotion;
-    double refract;
+    double reflect;
     // refractive propotion;
-    double refract_ind;
+    double refract;
     // refractive index;
+    double refract_ind;
+    // texture index;
+    bool texture_ind;
+    // transparent index;
+    bool transparent_ind;
+    // normal index;
+    bool normal_ind;
+    // motion index;
+    bool motion_ind;
+   
+    double motion_speed;
+    Vector3D motion_direction;
+
+    Texture* texture; 
+    Texture* normalmap; 
+    Texture* tranparent; 
 };
 
 struct Intersection {
@@ -160,10 +204,13 @@ struct Intersection {
 	// (i.e. point = ray.origin + t_value * ray.dir)
 	// This is used when you need to intersect multiply objects and
 	// only want to keep the nearest intersection.
-	double t_value;	
+	double t_value;
+    double uv[2];
 	// Set to true when no intersection has occured.
 	bool none;
 };
+
+
 
 // Ray structure. 
 struct Ray3D {

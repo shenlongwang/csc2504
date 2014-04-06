@@ -12,34 +12,142 @@
 
 
 #include "raytracer.h"
+#include "util.h"
 #include "bmp_io.h"
+#include "meshObject.h"
 #include <cmath>
 #include <omp.h>
 #include <ctime>
 #include <iostream>
 #include <cstdlib>
 
+//---------------------------------------------------------------------------------
+// define parameters for shading, does not mean disable PHONG shading
 #define SHADOW true 
 #define PHONG false 
-#define DEPTH 4
+#define ENVIRLIGHT 2 
+//---------------------------------------------------------------------------------
 
+//---------------------------------------------------------------------------------
+// define the depth of reflection and refraction. The deeper, the more time comsuming
+#define DEPTH 0
+//---------------------------------------------------------------------------------
+
+//---------------------------------------------------------------------------------
+// define the scene to render, please only enable one each time.
 
 // #define SCENE1
-#define SCENE2
+// #define SCENE2
+// #define SCENE3
+// #define SCENE4
+// #define SCENE5
+// #define SCENE6
+ #define SCENE7
+//---------------------------------------------------------------------------------
 
-#define DEPTH_OF_FIELD
+// define the resolution.
+#define SMALL
+//---------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------
+// define whether environment mapping is used. If no, disable that.
+// #define ENVIR
+//---------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------
+// define whether depth of field effects is on.
+// #define DEPTH_OF_FIELD
+//---------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------
+// define whether GLOSS reflection is on.
 // #define GLOSS
+//---------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------
+// define whether soft shadow is on
 // #define SOFT_SHADOW
+//---------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------
+// define whether anti-aliasing is on 
 // #define ANTI_ALIASING
+//---------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------
+// define whether reflection is on 
+// #define REFLECTION
+//---------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------
+// define whether refraction is on 
+// #define REFRACTION 
+//---------------------------------------------------------------------------------
 
-#define REFLECTION
-#define REFRACTION 
+using std::vector;
+
+double* multi_vector(double s, const double* v)
+{
+  double t[3] = {s*v[0], s*v[1], s*v[2]};
+  return t;
+}
+
+void dumpvectorfaces(vector<Face> vec)
+{
+    for (unsigned int i=0; i < vec.size(); i+=3)
+    {
+        printf("Vertex Points: (%i,%i,%i)\n",vec[i].verts.coords[0],vec[i].verts.coords[1],vec[i].verts.coords[2]);
+        printf("Texture Coords: (%i,%i,%i)\n",vec[i].texCoords.coords[0],vec[i].texCoords.coords[1],vec[i].texCoords.coords[2]);
+        printf("Normal Vector: (%i,%i,%i)\n",vec[i].normals.coords[0],vec[i].normals.coords[1],vec[i].normals.coords[2]);
+    }
+}
+
+void dumpvectorf(vector<Vector3f> vec)
+{
+    for (unsigned int i=0; i < vec.size(); ++i)
+    {
+        printf("Vertex Points: (%f,%f,%f)\n",vec[i].coords[0],vec[i].coords[1],vec[i].coords[2]);
+    }
+}
+
 Raytracer::Raytracer() : _lightSource(NULL) {
 	_root = new SceneDagNode();
 }
 
 Raytracer::~Raytracer() {
 	delete _root;
+}
+
+Texture::Texture() {
+
+}
+
+Texture::~Texture() {
+	delete _rbuffer;
+	delete _gbuffer;
+	delete _bbuffer;
+}
+
+bool Texture::readImage(char *file_name){
+    
+	// Pixel buffer.
+    long int imHeight = (long int) _texHeight; 
+    bool error_flag = bmp_read(file_name, &_texWidth, &imHeight, &_rbuffer , &_gbuffer, &_bbuffer);
+    _texHeight = (unsigned long int) imHeight;
+    if (error_flag)
+        std::cout<<"Texture Image Reading Error!"<<std::endl;
+    else
+        std::cout<<"Texture Image Reading Success! Image size:"<<_texHeight<<_texWidth<<std::endl;
+    
+    return error_flag;
+}
+
+Colour Texture::getColor(double uv[2]){
+   
+    double v = 1-fmin(1.0, fmax(uv[0], 0.0));
+    double u = 1-fmin(1.0, fmax(uv[1], 0.0));
+    int i = (int)(u*(_texHeight-1));
+    int j = (int)(v*(_texWidth-1));
+    // std::cout<<i<<", "<<j<<std::endl; 
+    Colour texColor(0.0, 0.0, 0.0);
+    texColor[0] = (1/255.0)*((double)_rbuffer[i*_texWidth+j]);
+   	texColor[1] = (1/255.0)*((double)_gbuffer[i*_texWidth+j]);
+   	texColor[2] = (1/255.0)*((double)_bbuffer[i*_texWidth+j]);
+    // std::cout<< texColor<<std::endl;
+    return texColor;
 }
 
 SceneDagNode* Raytracer::addObject( SceneDagNode* parent, 
@@ -65,6 +173,7 @@ SceneDagNode* Raytracer::addObject( SceneDagNode* parent,
 	
 	return node;
 }
+
 
 LightListNode* Raytracer::addLightSource( LightSource* light ) {
 	LightListNode* tmp = _lightSource;
@@ -146,6 +255,25 @@ void Raytracer::scale( SceneDagNode* node, Point3D origin, double factor[3] ) {
 	node->invtrans = scale*node->invtrans; 
 }
 
+void Raytracer::scale2( SceneDagNode* node, Point3D origin, double factor ) {
+	Matrix4x4 scale;
+	
+	scale[0][0] = factor;
+	scale[0][3] = origin[0] - factor * origin[0];
+	scale[1][1] = factor;
+	scale[1][3] = origin[1] - factor * origin[1];
+	scale[2][2] = factor;
+	scale[2][3] = origin[2] - factor * origin[2];
+	node->trans = node->trans*scale; 	
+	scale[0][0] = 1/factor;
+	scale[0][3] = origin[0] - 1/factor * origin[0];
+	scale[1][1] = 1/factor;
+	scale[1][3] = origin[1] - 1/factor * origin[1];
+	scale[2][2] = 1/factor;
+	scale[2][3] = origin[2] - 1/factor * origin[2];
+	node->invtrans = scale*node->invtrans; 
+}
+
 Matrix4x4 Raytracer::initInvViewMatrix( Point3D eye, Vector3D view, 
 		Vector3D up ) {
 	Matrix4x4 mat; 
@@ -224,15 +352,24 @@ void Raytracer::computeShading( Ray3D& ray ) {
         {
             r_i = (((double) rand() / (RAND_MAX))-0.5)*light_size;
             r_j = (((double) rand() / (RAND_MAX))-0.5)*light_size;
-            rayLight.dir = curLight->light->get_position() + r_i * rayDir1 + r_j * rayDir2 - ray.intersection.point;
-            // rayLight.dir.normalize();
-            // std::cout<<rayLight.dir<<std::endl;
-            rayLight.origin = ray.intersection.point+0.001*rayLight.dir;
-            traverseScene(_root, rayLight); 
-            if (!rayLight.intersection.none && rayLight.intersection.t_value > 0.0)
-                curLight->light->shade(ray, SHADOW);
+            if (!ray.intersection.none && ray.intersection.t_value > 0.0)
+            {
+                rayLight.dir = curLight->light->get_position() + r_i * rayDir1 + r_j * rayDir2 - ray.intersection.point;
+                rayLight.origin = ray.intersection.point+0.001*rayLight.dir;
+                rayLight.dir.normalize(); 
+                // std::cout<<rayLight.dir<<std::endl;
+                traverseScene(_root, rayLight);
+                if (!rayLight.intersection.none && rayLight.intersection.t_value > 0.0)
+                {
+                    curLight->light->shade(ray, SHADOW);
+        	    }
+                else
+                    curLight->light->shade(ray, PHONG);
+            }
+#ifdef ENVIR
         	else
-                curLight->light->shade(ray, PHONG);
+                curLight->light->shade(ray, SHADOW);
+#endif    
             raySoftShadowColour = raySoftShadowColour + softWeight * ray.col;
         }
         rayAccumulater = rayAccumulater + raySoftShadowColour;
@@ -314,58 +451,18 @@ Colour Raytracer::shadeRay( Ray3D& ray, int depth ) {
 	Colour col(0.0, 0.0, 0.0); 
 	Colour col_reflect(0.0, 0.0, 0.0); 
 	Colour col_refract(0.0, 0.0, 0.0); 
-	traverseScene(_root, ray); 
 	
-	// Don't bother shading if the ray didn't hit 
-	// anything.
-//*  	if (!ray.intersection.none) {
-//*  #ifdef REFLECTION
-//*          if (ray.intersection.mat->specular_exp > 0 && ray.intersection.mat->reflect > 0)
-//*          {
-//*              Ray3D reflect_ray;
-//*              double reflect_rate = ray.intersection.mat->reflect;
-//*              Vector3D reflect_v = ray.intersection.point - ray.origin;
-//*              reflect_v.normalize();
-//*              ray.intersection.normal.normalize();
-//*              reflect_ray.dir = reflect_v - 2*((reflect_v.dot(ray.intersection.normal))*ray.intersection.normal);
-//*              // reflect_ray.dir.normalize();
-//*              reflect_ray.origin = ray.intersection.point+0.001*reflect_ray.dir;
-//*  	        traverseScene(_root, reflect_ray); 
-//*  	        if (!reflect_ray.intersection.none) {
-//*                  computeShading(reflect_ray);
-//*  		        computeShading(ray); 
-//*  		        ray.col = ray.col+reflect_rate*ray.intersection.mat->specular*reflect_ray.col;
-//*                  ray.col.clamp();
-//*                  col = ray.col;
-//*                  return col;
-//*              }
-//*              else
-//*              {
-//*                  computeShading(ray); 
-//*                  col = ray.col;
-//*                  col.clamp();
-//*                  return col;
-//*              }
-//*  	    }
-//*          else 
-//*          {
-//*              computeShading(ray); 
-//*              col = ray.col;
-//*              col.clamp();
-//*              return col;
-//*          }
-//*  #else
-//*  		computeShading(ray); 
-//*          col = ray.col;
-//*  #endif
-//*  	}
-//*  
-//*  	// You'll want to call shadeRay recursively (with a different ray, 
-//*  	// of course) here to implement reflection/refraction effects.  
-//*  
-//*  	return col; 
+    traverseScene(_root, ray); 
+    
    	if ((!ray.intersection.none) && (depth != 0)) {
+    // if (ray.intersection.mat->texture_ind)
+        // std::cout<<ray.intersection.mat->texture->_texWidth<<std::endl;
     #ifdef REFLECTION
+    
+    #ifdef GLOSSY
+
+
+    #else
             double reflect_rate = ray.intersection.mat->reflect;
             if (ray.intersection.mat->specular_exp > 0 && reflect_rate > 0)
             {
@@ -377,6 +474,7 @@ Colour Raytracer::shadeRay( Ray3D& ray, int depth ) {
                 reflect_ray.dir.normalize();
                 reflect_ray.origin = ray.intersection.point+0.001*reflect_ray.dir;
                 col_reflect = shadeRay(reflect_ray, depth - 1);
+                col_reflect.clamp();
             }
     #endif
     #ifdef REFRACTION
@@ -393,55 +491,26 @@ Colour Raytracer::shadeRay( Ray3D& ray, int depth ) {
                 if (cost2 > 0.0) {
                     Ray3D refract_ray;
                     Vector3D refract_t = n_div_nt * refract_d + (n_div_nt * c - sqrt(cost2)) * refract_n;
-                    refract_ray.dir = refract_t;
+                    if (d_dot_n > 0)
+                        refract_ray.dir = refract_t - 2*(refract_t.dot(refract_n))*refract_n;
+                    else
+                        refract_ray.dir = refract_t;
                     refract_ray.origin = ray.intersection.point+0.0001*refract_ray.dir;
                     col_refract = shadeRay(refract_ray, depth - 1);
                     col_refract.clamp();
                 }
-                
-// Comment at 08:01 pm Mar 26;                
-//                  if (d_dot_n < 0) {
-//                      refract_d.normalize();
-//                      refract_n.normalize();
-//                      Vector3D refract_t1 = n_div_nt*(refract_d - d_dot_n*refract_n);
-//                      Vector3D refract_t2 = sqrt(1 - pow(n_div_nt,2)*(1-pow(d_dot_n,2)));
-//                      Vector3D refract_t = refract_t1 + refract_t2;
-//                      refract_ray.dir = refract_t;
-//                      refract_ray.origin = ray.intersection.point+0.0001*refract_ray.dir;
-//                  }
-//                  else {
-//                      double n_div_nt = ray.intersection.mat->refractive_ind;
-//                      refract_d.normalize();
-//                      refract_n = -refract_n;
-//                      refract_n.normalize();
-//                      Vector3D refract_t1 = n_div_nt*(refract_d - d_dot_n*refract_n);
-//                      Vector3D refract_t2 = sqrt(1 - pow(n_div_nt,2)*(1-pow(d_dot_n,2)));
-//                      Vector3D refract_t = refract_t1 + refract_t2;
-//                      refract_ray.dir = refract_t;
-//                      refract_ray.origin = ray.intersection.point+0.0001*refract_ray.dir;
-//                      if (!refract_ray.intersection.none)
-//                          c = refract_t.dot(-refract_n);
-//                      else {
-//                          ray.col = refract_col * col_reflect;
-//                          ray.col.clamp();
-//                          return ray.col;
-//                      }
-//                  }
-//                  double R_0 = (refract_n - 1)^2 / (refract_n + 1)^2;
-//                  double R = R_0 + (1 - R_0) * (1 - c)^5;
-//                  computeShading(refract_ray, depth - 1);
-//      		    col_refract = R*refract_ray.col;
-//                  col_refract.clamp();
-//                  }
+    #endif             
             }
     
     #endif
     		computeShading(ray);
+    
     #ifdef REFLECTION
             ray.col = ray.col + reflect_rate*ray.intersection.mat->specular*col_reflect;
     #endif
+    
     #ifdef REFRACTION
-            ray.col = ray.col + col_refract;
+            ray.col = (1-ray.intersection.mat->refract)*ray.col + ray.intersection.mat->refract*col_refract;
     #endif
             ray.col.clamp();
             col = ray.col;
@@ -454,6 +523,15 @@ Colour Raytracer::shadeRay( Ray3D& ray, int depth ) {
             col.clamp();
             return col;
         }
+
+#ifdef ENVIR        
+        if (ray.intersection.none) {
+            computeShading(ray);
+            col = ray.col;
+            col.clamp();
+            return col;
+        }
+#endif
     	// You'll want to call shadeRay recursively (with a different ray, 
     	// of course) here to implement reflection/refraction effects.  
     
@@ -479,7 +557,7 @@ void Raytracer::render( int width, int height, Point3D eye, Vector3D view,
 	double factor = (double(tempHeight)/2)/tan(fov*M_PI/360.0);
 	// Construct a ray for each pixel.
 #ifdef ANTI_ALIASING
-    anti_size = 4;
+    anti_size = 3;
 #else
     anti_size = 1;
 #endif
@@ -501,8 +579,11 @@ void Raytracer::render( int width, int height, Point3D eye, Vector3D view,
 			Point3D origin(0, 0, 0);
 			Point3D imagePlane;
             Colour col;
+            std::cout<< "Rendering pixel("<<i<<", "<<j<<")..."<<std::endl;
             // Antialiasing with jittering sampling. 
             // Reference: Sectoin 13.4.1 Fundamentals of Computer Graphics
+
+
             for (int anti_i = 0; anti_i < anti_size; anti_i++)
                 for (int anti_j = 0; anti_j < anti_size; anti_j++)
                 {
@@ -535,15 +616,16 @@ void Raytracer::render( int width, int height, Point3D eye, Vector3D view,
                     ray.origin = viewToWorld * origin;
                     ray.dir = viewToWorld * imagePlane - ray.origin;
                     ray.dir.normalize();
-            		col = col + anti_weight*shadeRay(ray, 3); 
+            		col = col + anti_weight*shadeRay(ray, DEPTH); 
 #endif
                 }
+
+
             _rbuffer[i*width+j] = int(col[0]*255);
 		    _gbuffer[i*width+j] = int(col[1]*255);
 		    _bbuffer[i*width+j] = int(col[2]*255);
-            std::cout<< "\r Rendering pixel("<<i<<", "<<j<<")...";
 		}
-        if (i%10 == 0)
+        if (i%1 == 0)
             std::cout<<"Rendering "<<i<<"th Row..."<<std::endl;
 	}
 	flushPixelBuffer(fileName);
@@ -557,9 +639,13 @@ int main(int argc, char* argv[])
 	// change this if you're just implementing part one of the 
 	// assignment.  
 	Raytracer raytracer;
-	int width = 320; 
-	int height = 240; 
-
+#ifdef SMALL
+	int width = 480; 
+	int height = 320; 
+#else
+	int width = 1920; 
+	int height = 1080; 
+#endif
 	if (argc == 3) {
 		width = atoi(argv[1]);
 		height = atoi(argv[2]);
@@ -569,7 +655,7 @@ int main(int argc, char* argv[])
 	// Defines a material for shading.
 	Material gold( Colour(0.3, 0.3, 0.3), Colour(0.75164, 0.60648, 0.22648), 
 			Colour(0.628281, 0.555802, 0.366065), 
-			51.2, 1.0, 0.0, 0.0 );
+			12.8, 0.6, 0.0, 0.0 );
 	Material jade( Colour(0, 0, 0), Colour(0.54, 0.89, 0.63), 
 			Colour(0.316228, 0.316228, 0.316228), 
 			12.8, 0.5, 0.0, 0.0  );
@@ -587,16 +673,22 @@ int main(int argc, char* argv[])
 			12.8, 0.5, 0.0, 0.0  );
 	Material blue( Colour(0.0, 0.0, 0.0), Colour(0.3, 0.3, 0.9), 
 			Colour(0.316228, 0.316228, 0.616228), 
-			52.8, 1.0, 0.0, 0.0  );
+			32.8, 0.3, 0.0, 0.0  );
 	Material black( Colour(0.0, 0.0, 0.0), Colour(0.4, 0.4, 0.4), 
 			Colour(0.316228, 0.316228, 0.316228), 
 			52.8, 1.0, 0.0, 0.0  );
 	Material mirror( Colour(0.0, 0.0, 0.0), Colour(0.0, 0.0, 0.0), 
 			Colour(0.8, 0.8, 0.8), 
-			12.8, 1.0, 0.0, 0.0  );
+			32.8, 1.0, 0.0, 0.0  );
 	Material glass( Colour(0.0, 0.0, 0.0), Colour(0.4, 0.4, 0.4), 
 			Colour(0.8, 0.6, 0.8), 
-			52.8, 0.2, 1.0, 1.4 );
+			52.8, 0.1, 1.0, 1.4 );
+	Material blue_glass( Colour(0.0, 0.0, 0.0), Colour(0.2, 0.2, 0.4), 
+			Colour(0.2, 0.2, 0.2), 
+			52.8, 0, 0.5, 1.0 );
+	Material red_glass( Colour(0.0, 0.0, 0.0), Colour(0.5, 0.3, 0.0), 
+			Colour(0.2, 0.2, 0.2), 
+			52.8, 0, 0.5, 1.0 );
 
 #ifdef SCENE1
 	// Defines a point light source.
@@ -660,7 +752,7 @@ int main(int argc, char* argv[])
 	double fov = 60;
 	Point3D eye(0, 0, 14);
 	Vector3D view(0, 0, -9);
-    raytracer.render(width, height, eye, view, up, fov, "view1.bmp");
+    raytracer.render(width, height, eye, view, up, fov, "scene1_view1.bmp");
 	time(&timer2);
 	// Render it from a different point of view.
     double seconds = difftime(timer2, timer1);
@@ -668,31 +760,36 @@ int main(int argc, char* argv[])
     timer1 = timer2;
 	Point3D eye2(3, 3, 4);
 	Vector3D view2(-3, -3, -3);
-	raytracer.render(width, height, eye2, view2, up, fov, "view2.bmp");
+	raytracer.render(width, height, eye2, view2, up, fov, "scene1_view2.bmp");
 	time(&timer2);
     seconds = difftime(timer2, timer1);
     std::cout<<"Second image rendering finished. It takes "<<seconds<<" seconds."<<std::endl;
 #endif	
 #ifdef SCENE2
 	// Defines a point light source.
-	raytracer.addLightSource( new PointLight(Point3D(-6, 8, 0), 
+	raytracer.addLightSource( new PointLight(Point3D(-6, 20, 0), 
 				Colour(0.4, 0.4, 0.4) ) );
-	raytracer.addLightSource( new PointLight(Point3D(4, 8, 2), 
+	raytracer.addLightSource( new PointLight(Point3D(4, 28, 2), 
 				Colour(0.4, 0.4, 0.4) ) );
 
 	// Add a unit square into the scene with material mat.
 	SceneDagNode* plane = raytracer.addObject( new UnitSquare(), &gold );
 	// SceneDagNode* plane_2 = raytracer.addObject( new UnitSquare(), &glass );
 	SceneDagNode* sphere = raytracer.addObject( new UnitSphere(), &glass );
-	SceneDagNode* sphere_2 = raytracer.addObject( new UnitSphere(), &blue );
-	SceneDagNode* sphere_3 = raytracer.addObject( new UnitSphere(), &mirror );
+	SceneDagNode* sphere_2 = raytracer.addObject( new UnitSphere(), &mirror );
+	SceneDagNode* sphere_3 = raytracer.addObject( new UnitSphere(), &blue );
+    
+    plane->mat->texture_ind = false; 
+    sphere->mat->texture_ind = false; 
+    sphere_2->mat->texture_ind = false; 
+    sphere_3->mat->texture_ind = false; 
 	
 	// Apply some transformations to the unit square.
 	double factor1[3] = { 3.0, 3.0, 3.0 };
 	double factor2[3] = { 32.0, 32.0, 32.0 };
-	raytracer.translate(sphere, Vector3D(-2, 4, -1));	
-	raytracer.translate(sphere_2, Vector3D(0, 2, 1));	
-	raytracer.translate(sphere_3, Vector3D(1, 6, -0.5));	
+	raytracer.translate(sphere, Vector3D(-1, 10, -1));	
+	raytracer.translate(sphere_2, Vector3D(0, 5, 0));	
+	raytracer.translate(sphere_3, Vector3D(1, 15, -0.5));	
 
 	raytracer.rotate(plane, 'x', -90); 
 	raytracer.scale(plane, Point3D(0, 0, 0), factor2);
@@ -702,10 +799,10 @@ int main(int argc, char* argv[])
 	// raytracer.scale(plane_2, Point3D(0, 0, 0), factor1);
 	
     Vector3D up(0, 0, 1);
-	double fov = 20;
-	Point3D eye(0, 10, 0);
+	double fov = 60;
+	Point3D eye(0, 17, 0);
 	Vector3D view(0, -1, 0);
-    raytracer.render(width, height, eye, view, up, fov, "view1_scene2.bmp");
+    raytracer.render(width, height, eye, view, up, fov, "scene2_view1.bmp");
 	time(&timer2);
 	// Render it from a different point of view.
     double seconds = difftime(timer2, timer1);
@@ -713,14 +810,561 @@ int main(int argc, char* argv[])
     timer1 = timer2;
 	double fov2 = 60;
     Vector3D up2(0, 1, 3);
-	Point3D eye2(0, 8, -2);
+	Point3D eye2(0, 18, -6);
 	Vector3D view2(0, -3, 1);
-	raytracer.render(width, height, eye2, view2, up2, fov2, "view2.bmp");
+	raytracer.render(width, height, eye2, view2, up2, fov2, "scene2_view2.bmp");
 	time(&timer2);
     seconds = difftime(timer2, timer1);
     std::cout<<"Second image rendering finished. It takes "<<seconds<<" seconds."<<std::endl;
 #endif	
+#ifdef SCENE3
+	// Defines a point light source.
+	raytracer.addLightSource( new PointLight(Point3D(0, 0, 0), 
+				Colour(0.8, 0.8, 0.8) ) );
+	raytracer.addLightSource( new PointLight(Point3D(0, 30, 30), 
+				Colour(0.4, 0.4, 0.4) ) );
+	raytracer.addLightSource( new PointLight(Point3D(0, 30, -30), 
+				Colour(0.4, 0.4, 0.4) ) );
+	raytracer.addLightSource( new PointLight(Point3D(0, 80, 0), 
+				Colour(0.8, 0.8, 0.8) ) );
+
+	Material mat_mercury( Colour(0.3, 0.3, 0.3), Colour(0.3, 0.3, 0.3), 
+			Colour(0.316228, 0.316228, 0.316228), 
+			12.8, 0.2, 0.0, 0.0  );
+	Material mat_venus( Colour(0.3, 0.3, 0.3), Colour(0.3, 0.3, 0.3), 
+			Colour(0.316228, 0.316228, 0.316228), 
+			12.8, 0.2, 0.0, 0.0  );
+	Material mat_earth( Colour(0.3, 0.3, 0.3), Colour(0.3, 0.3, 0.9), 
+			Colour(0.316228, 0.316228, 0.616228), 
+			12.8, 0.2, 0.0, 0.0  );
+	Material mat_mars( Colour(0.3, 0.3, 0.3), Colour(0.3, 0.3, 0.3), 
+			Colour(0.316228, 0.316228, 0.316228), 
+			12.8, 0.2, 0.0, 0.0  );
+	Material mat_jupiter( Colour(0.3, 0.3, 0.3), Colour(0.3, 0.3, 0.3), 
+			Colour(0.316228, 0.316228, 0.316228), 
+			12.8, 0.2, 0.0, 0.0  );
+	Material mat_saturn( Colour(0.3, 0.3, 0.3), Colour(0.3, 0.3, 0.3), 
+			Colour(0.316228, 0.316228, 0.316228), 
+			12.8, 0.2, 0.0, 0.0  );
+	Material mat_uranus( Colour(0.3, 0.3, 0.3), Colour(0.3, 0.3, 0.3), 
+			Colour(0.316228, 0.316228, 0.316228), 
+			12.8, 0.2, 0.0, 0.0  );
+	Material mat_neptune( Colour(0.3, 0.3, 0.3), Colour(0.3, 0.3, 0.3), 
+			Colour(0.316228, 0.316228, 0.316228), 
+			12.8, 0.2, 0.0, 0.0  );
+	Material mat_galaxy( Colour(0.3, 0.3, 0.3), Colour(0.1, 0.1, 0.1), 
+			Colour(0.016228, 0.016228, 0.016228), 
+			1.0, 0.0, 0.0, 0.0  );
+	Material mat_saturnring( Colour(0.3, 0.3, 0.3), Colour(0.3, 0.3, 0.3), 
+			Colour(0.316228, 0.316228, 0.316228), 
+			12.8, 0.2, 0.0, 0.0  );
+	Material mat_uranusring( Colour(0.3, 0.3, 0.3), Colour(0.3, 0.3, 0.3), 
+			Colour(0.316228, 0.316228, 0.316228), 
+			12.8, 0.2, 0.0, 0.0  );
+	// Add a unit square into the scene with material mat.
+	SceneDagNode* mercury = raytracer.addObject( new UnitSphere(), &mat_mercury );
+	SceneDagNode* venus = raytracer.addObject( new UnitSphere(), &mat_venus );
+	SceneDagNode* earth = raytracer.addObject( new UnitSphere(), &mat_earth );
+	SceneDagNode* mars = raytracer.addObject( new UnitSphere(), &mat_mars );
+	SceneDagNode* jupiter = raytracer.addObject( new UnitSphere(), &mat_jupiter);
+	SceneDagNode* saturn = raytracer.addObject( new UnitSphere(), &mat_saturn );
+	SceneDagNode* uranus = raytracer.addObject( new UnitSphere(), &mat_uranus );
+	SceneDagNode* neptune = raytracer.addObject( new UnitSphere(), &mat_neptune );
+	SceneDagNode* saturn_ring = raytracer.addObject( new UnitRing(), &mat_saturnring );
+	SceneDagNode* uranus_ring = raytracer.addObject( new UnitRing(), &mat_uranusring );
+	SceneDagNode* galaxy = raytracer.addObject( new EnvirSphere(), &mat_galaxy );
+	
+	// Apply some transformations to the unit square.
+    // double radius[8] = {5, 12, 13, 7, 142, 120, 51, 49};
+    double radius[8] = {40, 45, 53, 40, 162, 120, 81, 69};
+    double distance[8] = {20, 200, 440, 700, 1300, 2000, 2500, 3000};
+    // double rad_factor[3] = {0.01, 0.01, 0.01};
+    Vector3D dis_factor(0.000, 0.02, 0.0);
+    double rad_factor = 0.03;
+    // 	double radius[8] = {1, 1, 1, 1, 1, 1, 1, 1};
+	// double distance[8] = {1, 3, 5, 7, 9, 11, 13};
+    //	Vector3D dis_factor(0.0, 1.0, 0.0);
+	
+    // Add a texture; 
+    Texture mercurytex;
+    mercurytex.readImage("./Textures/mercurymap.bmp");
+    mercury->mat->texture = &mercurytex;  
+    mercury->mat->texture_ind = true; 
+    // Add a texture; 
+    Texture venustex;
+    venustex.readImage("./Textures/venusmap.bmp");
+    venus->mat->texture = &venustex;  
+    venus->mat->texture_ind = true; 
+    // Add a texture; 
+    Texture earthtex;
+    earthtex.readImage("./Textures/earthmap1k.bmp");
+    earth->mat->texture = &earthtex;  
+    earth->mat->texture_ind = true; 
+    // Add a texture; 
+    Texture marstex;
+    marstex.readImage("./Textures/mars_1k_color.bmp");
+    mars->mat->texture = &marstex;  
+    mars->mat->texture_ind = true; 
+    // Add a texture; 
+    Texture jupitertex;
+    jupitertex.readImage("./Textures/jupitermap.bmp");
+    jupiter->mat->texture = &jupitertex;  
+    jupiter->mat->texture_ind = true; 
+    // Add a texture; 
+    Texture saturntex;
+    saturntex.readImage("./Textures/saturnmap.bmp");
+    saturn->mat->texture = &saturntex;  
+    saturn->mat->texture_ind = true; 
+    // Add a texture; 
+    Texture uranustex;
+    uranustex.readImage("./Textures/uranusmap.bmp");
+    uranus->mat->texture = &uranustex;  
+    uranus->mat->texture_ind = true; 
+    // Add a texture; 
+    Texture neptunetex;
+    neptunetex.readImage("./Textures/neptunemap.bmp");
+    neptune->mat->texture = &neptunetex;  
+    neptune->mat->texture_ind = true; 
+    // Add a texture; 
+    Texture galaxytex;
+    galaxytex.readImage("./Textures/galaxy.bmp");
+    galaxy->mat->texture = &galaxytex;  
+    galaxy->mat->texture_ind = true; 
     
+    // Add a texture; 
+    Texture saturnringtex;
+    saturnringtex.readImage("./Textures/saturnringcolor.bmp");
+    saturn_ring->mat->texture = &saturnringtex;  
+    saturn_ring->mat->texture_ind = true; 
+    
+    // Add a texture; 
+    Texture uranusringtex;
+    uranusringtex.readImage("./Textures/uranusringcolour.bmp");
+    uranus_ring->mat->texture = &uranusringtex;  
+    uranus_ring->mat->texture_ind = true; 
+    
+   //   // Add a texture; 
+   //   Texture saturnringtrans;
+   //   saturnringtrans.readImage("./Textures/saturnringtrans.bmp");
+   //   saturn_ring->mat->transparent = &saturnringtrans;  
+   //   saturn_ring->mat->transparent_ind = true; 
+   //   
+   //   // Add a texture; 
+   //   Texture uranusringtrans;
+   //   uranusringtrans.readImage("./Textures/uranusringtrans.bmp");
+   //   uranus_ring->mat->transparent = &uranusringtrans;  
+   //   uranus_ring->mat->transparent_ind = true; 
+    
+    raytracer.translate(mercury, (distance[0]*dis_factor));	
+    raytracer.translate(venus, (distance[1]*dis_factor));	
+    raytracer.translate(earth, (distance[2]*dis_factor));	
+    raytracer.translate(mars, (distance[3]*dis_factor));	
+    raytracer.translate(jupiter, (distance[4]*dis_factor));	
+    raytracer.translate(saturn, (distance[5]*dis_factor));	
+    raytracer.translate(saturn_ring, (distance[5]*dis_factor));	
+    raytracer.translate(uranus, (distance[6]*dis_factor));	
+    raytracer.translate(uranus_ring, (distance[6]*dis_factor));	
+    raytracer.translate(neptune, (distance[7]*dis_factor));	
+    raytracer.translate(galaxy, (distance[4]*dis_factor));	
+   
+   raytracer.scale2(mercury, Point3D(0, 0, 0), rad_factor*radius[0]);
+   raytracer.scale2(venus, Point3D(0, 0, 0), rad_factor*radius[1]);
+   raytracer.scale2(earth, Point3D(0, 0, 0), rad_factor*radius[2]);
+   raytracer.scale2(mars, Point3D(0, 0, 0), rad_factor*radius[3]);
+   raytracer.scale2(jupiter, Point3D(0, 0, 0), rad_factor*radius[4]);
+   raytracer.scale2(saturn, Point3D(0, 0, 0), rad_factor*radius[5]);
+   raytracer.scale2(saturn_ring, Point3D(0, 0, 0), rad_factor*radius[5]*1.6);
+   raytracer.scale2(uranus, Point3D(0, 0, 0), rad_factor*radius[6]);
+   raytracer.scale2(uranus_ring, Point3D(0, 0, 0), rad_factor*radius[6]*1.6);
+   raytracer.scale2(neptune, Point3D(0, 0, 0), rad_factor*radius[7]);
+   raytracer.scale2(galaxy, Point3D(0, 0, 0), 50);
+    
+    // raytracer.scale(mercury, Point3D(0, 0, 0), multi_vector(radius[0],rad_factor));
+    // raytracer.scale(venus, Point3D(0, 0, 0), multi_vector(radius[1],rad_factor));
+    // raytracer.scale(earth, Point3D(0, 0, 0), multi_vector(radius[2],rad_factor));
+    // raytracer.scale(mars, Point3D(0, 0, 0), multi_vector(radius[3],rad_factor));
+    // raytracer.scale(jupiter, Point3D(0, 0, 0), multi_vector(radius[4],rad_factor));
+    // raytracer.scale(saturn, Point3D(0, 0, 0), multi_vector(radius[5],rad_factor));
+    // raytracer.scale(uranus, Point3D(0, 0, 0), multi_vector(radius[6],rad_factor));
+    // raytracer.scale(neptune, Point3D(0, 0, 0), multi_vector(radius[7],rad_factor));
+	
+	// raytracer.translate(plane_2, Vector3D(0, 5, 0));	
+	
+    raytracer.rotate(earth, 'x', 75); 
+    raytracer.rotate(saturn_ring, 'x', 75); 
+	raytracer.rotate(saturn_ring, 'z', 30); 
+	raytracer.rotate(uranus_ring, 'x', 90); 
+	raytracer.rotate(uranus_ring, 'z', 15); 
+	// raytracer.scale(plane_2, Point3D(0, 0, 0), factor1);
+	
+    Vector3D up(-1, 0, 0);
+	double fov = 60;
+	Point3D eye(0, 28, 44);
+	Vector3D view(0, 0, -1);
+    
+    raytracer.render(width, height, eye, view, up, fov, "solar_1.bmp");
+	time(&timer2);
+	// Render it from a different point of view.
+    double seconds = difftime(timer2, timer1);
+    std::cout<<"First image rendering finished. It takes "<<seconds<<" seconds."<<std::endl;
+    timer1 = timer2;
+	double fov2 = 60;
+    Vector3D up2(-1, 0, 0);
+	Point3D eye2(0, 7, 12);
+	Vector3D view2(0, 0, -1);
+	raytracer.render(width, height, eye2, view2, up2, fov2, "solar_2.bmp");
+	time(&timer2);
+    seconds = difftime(timer2, timer1);
+    std::cout<<"Second image rendering finished. It takes "<<seconds<<" seconds."<<std::endl;
+#endif	
+#ifdef SCENE4
+	// Defines a point light source.
+	raytracer.addLightSource( new PointLight(Point3D(0, 0, 0), 
+				Colour(0.8, 0.8, 0.8) ) );
+	// Defines a point light source.
+	raytracer.addLightSource( new PointLight(Point3D(0, 0, 5), 
+				Colour(0.4, 0.4, 0.4) ) );
+	// Defines a point light source.
+	raytracer.addLightSource( new PointLight(Point3D(0, 0, -5), 
+				Colour(0.4, 0.4, 0.4) ) );
+	// Defines a point light source.
+	raytracer.addLightSource( new PointLight(Point3D(5, 0, 0), 
+				Colour(0.4, 0.4, 0.4) ) );
+	// Defines a point light source.
+	raytracer.addLightSource( new PointLight(Point3D(-5, 0, 0), 
+				Colour(0.4, 0.4, 0.4) ) );
+	raytracer.addLightSource( new PointLight(Point3D(0, 0, 0), 
+				Colour(0.6, 0.6, 0.6) ) );
+
+	Material mat_earth( Colour(0.0, 0.0, 0.0), Colour(0.3, 0.3, 0.9), 
+			Colour(0.316228, 0.316228, 0.316228), 
+			52.8, 0.3, 0.0, 0.0  );
+	Material mat_cloud( Colour(0.0, 0.0, 0.0), Colour(0.3, 0.3, 0.9), 
+			Colour(0.316228, 0.316228, 0.316228), 
+			52.8, 0.3, 0.0, 0.0  );
+	Material mat_light( Colour(0.0, 0.0, 0.0), Colour(0.3, 0.3, 0.9), 
+			Colour(0.616228, 0.616228, 0.616228), 
+			52.8, 0.3, 0.0, 0.0  );
+	// Add a unit square into the scene with material mat.
+	SceneDagNode* earth = raytracer.addObject( new UnitSphere(), &mat_earth );
+	SceneDagNode* earth_cloud = raytracer.addObject( new UnitSphere(), &mat_cloud );
+	SceneDagNode* earth_light = raytracer.addObject( new UnitSphere(), &mat_light );
+	
+    Vector3D dis_factor(0, 3, 0);
+    raytracer.translate(earth, dis_factor);	
+    raytracer.translate(earth_light, (2.0*dis_factor));	
+    // Add a texture; 
+    Texture earthtex;
+    earthtex.readImage("./Textures/earthmap1k.bmp");
+    earth->mat->texture = &earthtex;  
+    earth->mat->texture_ind = true; 
+    // Add a texture; 
+   Texture earthcloud;
+   earthcloud.readImage("./Textures/earthcloudmap.bmp");
+   earth_cloud->mat->texture = &earthcloud;  
+   earth_cloud->mat->texture_ind = true; 
+   // Add a texture; 
+   Texture earthlight;
+   earthlight.readImage("./Textures/earthlights1k.bmp");
+   earth_light->mat->texture = &earthlight;  
+   earth_light->mat->texture_ind = true; 
+    
+
+    Vector3D up(0, 0, -1);
+	double fov = 30;
+	Point3D eye(10, 3, 0);
+	Vector3D view(-1, 0, 0);
+    raytracer.render(width, height, eye, view, up, fov, "earth_1.bmp");
+	time(&timer2);
+	// Render it from a different point of view.
+    double seconds = difftime(timer2, timer1);
+    std::cout<<"First image rendering finished. It takes "<<seconds<<" seconds."<<std::endl;
+    timer1 = timer2;
+	double fov2 = 60;
+    Vector3D up2(-1, 0, 0);
+	Point3D eye2(0, 3, -5);
+	Vector3D view2(0, 0, 1);
+	raytracer.render(width, height, eye2, view2, up2, fov2, "earth_2.bmp");
+	time(&timer2);
+    seconds = difftime(timer2, timer1);
+    std::cout<<"Second image rendering finished. It takes "<<seconds<<" seconds."<<std::endl;
+#endif	
+#ifdef SCENE5
+	// Defines a point light source.
+	raytracer.addLightSource( new PointLight(Point3D(-6, 10, 0), 
+				Colour(0.3, 0.3, 0.3) ) );
+	raytracer.addLightSource( new PointLight(Point3D(4, 18, 2), 
+				Colour(0.3, 0.3, 0.3) ) );
+
+	Material mat_galaxy( Colour(0.0, 0.0, 0.0), Colour(0.0, 0.0, 0.0), 
+			Colour(0.016228, 0.016228, 0.016228), 
+			1.0, 0.0, 0.0, 0.0  );
+	Material mirror2( Colour(0.0, 0.0, 0.0), Colour(0.0, 0.0, 0.0), 
+			Colour(0.3, 0.3, 0.3), 
+			52.8, 1.0, 0.0, 0.0  );
+	// Defines a material for shading.
+	Material gold_floor( Colour(0.3, 0.3, 0.3), Colour(0.75164, 0.60648, 0.22648), 
+			Colour(0.128281, 0.155802, 0.166065), 
+			12.8, 0.8, 0.0, 0.0 );
+	// Add a unit square into the scene with material mat.
+	SceneDagNode* plane = raytracer.addObject( new UnitSquare(), &gold );
+	// SceneDagNode* plane_2 = raytracer.addObject( new UnitSquare(), &glass );
+	SceneDagNode* sphere = raytracer.addObject( new UnitSphere(), &mirror );
+	SceneDagNode* sphere_2 = raytracer.addObject( new UnitSphere(), &mirror );
+	SceneDagNode* sphere_3 = raytracer.addObject( new UnitSphere(), &glass );
+	SceneDagNode* cube = raytracer.addObject( new GeneralObject(), &mirror );
+	SceneDagNode* galaxy = raytracer.addObject( new EnvirSphere(), &mat_galaxy );
+    
+    plane->mat->texture_ind = false; 
+    sphere->mat->texture_ind = false; 
+    sphere_2->mat->texture_ind = false; 
+    sphere_3->mat->normal_ind = false; 
+    plane->mat->normal_ind = false; 
+    sphere->mat->normal_ind = false; 
+    sphere_2->mat->normal_ind = false; 
+    sphere_3->mat->normal_ind = false; 
+    
+    Texture galaxytex;
+    galaxytex.readImage("./Textures/skysmall.bmp");
+    galaxy->mat->texture = &galaxytex;  
+    galaxy->mat->texture_ind = true; 
+	
+	// Apply some transformations to the unit square.
+	double factor1[3] = { 3.0, 3.0, 3.0 };
+	double factor2[3] = { 8.0, 8.0, 8.0 };
+	double factor3[3] = { 0.6, 0.6, 0.6 };
+	raytracer.translate(cube, Vector3D(-2.5, 0.5, -2.5));	
+	raytracer.translate(sphere, Vector3D(1, 2.5, -1));	
+	raytracer.translate(sphere_2, Vector3D(-1, 3, 1));	
+	raytracer.translate(sphere_3, Vector3D(0, 4, 0));	
+    raytracer.scale2(galaxy, Point3D(0, 0, 0), 150);
+
+	raytracer.rotate(plane, 'x', -90); 
+	raytracer.scale(plane, Point3D(0, 0, 0), factor2);
+	raytracer.scale(cube, Point3D(0, 0, 0), factor3);
+	
+   //  raytracer.translate(plane_2, Vector3D(0, 5, 0));	
+   //  raytracer.rotate(plane_2, 'x', -90); 
+   //  raytracer.scale(plane_2, Point3D(0, 0, 0), factor1);
+	
+    Vector3D up(0, 0, 1);
+	double fov = 60;
+	Point3D eye(0, 9, 0);
+	Vector3D view(0, -1, 0);
+    raytracer.render(width, height, eye, view, up, fov, "scene5_view1.bmp");
+	time(&timer2);
+	// Render it from a different point of view.
+    double seconds = difftime(timer2, timer1);
+    std::cout<<"First image rendering finished. It takes "<<seconds<<" seconds."<<std::endl;
+    timer1 = timer2;
+	double fov2 = 60;
+    Vector3D up2(0, 1, 3);
+	Point3D eye2(0, 9, -3);
+	Vector3D view2(0, -3, 1);
+	raytracer.render(width, height, eye2, view2, up2, fov2, "scene5_view2.bmp");
+	time(&timer2);
+    seconds = difftime(timer2, timer1);
+    std::cout<<"Second image rendering finished. It takes "<<seconds<<" seconds."<<std::endl;
+    timer1 = timer2;
+	double fov3 = 60;
+    Vector3D up3(0, 1, 0);
+	Point3D eye3(0, 3, -7);
+	Vector3D view3(0, 0, 1);
+	raytracer.render(width, height, eye3, view3, up3, fov3, "scene5_view3.bmp");
+	time(&timer2);
+    seconds = difftime(timer2, timer1);
+    std::cout<<"third image rendering finished. It takes "<<seconds<<" seconds."<<std::endl;
+#endif	
+#ifdef SCENE6
+	// Defines a point light source.
+	raytracer.addLightSource( new PointLight(Point3D(0, -10, 0), 
+				Colour(0.8, 0.8, 0.8) ) );
+    raytracer.addLightSource( new PointLight(Point3D(0, -30, 30), 
+      			Colour(0.6, 0.6, 0.6) ) );
+    raytracer.addLightSource( new PointLight(Point3D(-5, 5, 0), 
+      			Colour(0.4, 0.4, 0.4) ) );
+    raytracer.addLightSource( new PointLight(Point3D(5, 5, 0), 
+      			Colour(0.4, 0.4, 0.4) ) );
+   //  raytracer.addLightSource( new PointLight(Point3D(0, 80, 0), 
+   //    			Colour(0.8, 0.8, 0.8) ) );
+
+	Material mat_earth( Colour(0.3, 0.3, 0.3), Colour(0.6, 0.6, 0.6), 
+			Colour(0.316228, 0.316228, 0.616228), 
+			12.8, 0.0, 0.0, 0.0  );
+	Material mat_moon( Colour(0.3, 0.3, 0.3), Colour(0.6, 0.6, 0.6), 
+			Colour(0.316228, 0.316228, 0.616228), 
+			12.8, 0.0, 0.0, 0.0  );
+	Material mat_galaxy( Colour(0.3, 0.3, 0.3), Colour(0.1, 0.1, 0.1), 
+			Colour(0.016228, 0.016228, 0.016228), 
+			1.0, 0.0, 0.0, 0.0  );
+	// Add a unit square into the scene with material mat.
+	SceneDagNode* earth = raytracer.addObject( new UnitSphere(), &mat_earth );
+ 	SceneDagNode* moon = raytracer.addObject( new UnitSphere(), &mat_moon );
+	SceneDagNode* galaxy = raytracer.addObject( new EnvirSphere(), &mat_galaxy );
+	
+	// Apply some transformations to the unit square.
+    // double radius[8] = {5, 12, 13, 7, 142, 120, 51, 49};
+    double radius[8] = {40, 45, 53, 40, 162, 120, 81, 69};
+    double distance[8] = {20, 200, 440, 700, 1300, 2000, 2500, 3000};
+    // double rad_factor[3] = {0.01, 0.01, 0.01};
+    Vector3D dis_factor(0.000, 0.02, 0.0);
+    double rad_factor = 0.03;
+    // 	double radius[8] = {1, 1, 1, 1, 1, 1, 1, 1};
+	// double distance[8] = {1, 3, 5, 7, 9, 11, 13};
+    //	Vector3D dis_factor(0.0, 1.0, 0.0);
+	
+    // Add a texture; 
+    Texture earthtex;
+    earthtex.readImage("./Textures/earthmap1k.bmp");
+    earth->mat->texture = &earthtex;  
+    earth->mat->texture_ind = true; 
+    // Add a texture; 
+    Texture earthnormal;
+    earthnormal.readImage("./Textures/earthnormal.bmp");
+    earth->mat->normalmap = &earthnormal;  
+    earth->mat->normal_ind = true; 
+    earth->mat->motion_ind = true; 
+    earth->mat->motion_speed = 0.01; 
+    earth->mat->motion_direction = Vector3D(1, 1, 1); 
+    // Add a texture; 
+    Texture moontex;
+    moontex.readImage("./Textures/moonmap1k.bmp");
+    moon->mat->texture = &moontex;  
+    moon->mat->texture_ind = true; 
+    // Add a texture; 
+    Texture moonnormal;
+    moonnormal.readImage("./Textures/moonnormal.bmp");
+    moon->mat->normalmap = &moonnormal;  
+    moon->mat->normal_ind = true; 
+    // Add a texture; 
+    Texture galaxytex;
+    galaxytex.readImage("./Textures/starfield.bmp");
+    galaxy->mat->texture = &galaxytex;  
+    galaxy->mat->texture_ind = true; 
+    
+    raytracer.translate(moon, Vector3D(1, 3, 2));	
+    raytracer.translate(galaxy, (distance[4]*dis_factor));	
+   
+    raytracer.scale2(earth, Point3D(0, 0, 0), rad_factor*radius[2]);
+    raytracer.scale2(moon, Point3D(0, 0, 0), 0.8);
+    raytracer.scale2(galaxy, Point3D(0, 0, 0), 50);
+    
+    raytracer.rotate(earth, 'z', 90); 
+    raytracer.rotate(earth, 'x', 45); 
+    // raytracer.rotate(earth, 'y', 90); 
+	
+    Vector3D up(-1, 0, 0);
+	double fov = 60;
+	Point3D eye(0, 0, 4);
+	Vector3D view(0, 0, -1);
+    
+    raytracer.render(width, height, eye, view, up, fov, "scene6_view1.bmp");
+	time(&timer2);
+	// Render it from a different point of view.
+    double seconds = difftime(timer2, timer1);
+    std::cout<<"First image rendering finished. It takes "<<seconds<<" seconds."<<std::endl;
+    timer1 = timer2;
+	double fov2 = 60;
+    Vector3D up2(0, 0, 1);
+	Point3D eye2(-8, 2, 0);
+	Vector3D view2(1, 0, 0);
+	raytracer.render(width, height, eye2, view2, up2, fov2, "scene6_view2.bmp");
+	time(&timer2);
+    seconds = difftime(timer2, timer1);
+    std::cout<<"Second image rendering finished. It takes "<<seconds<<" seconds."<<std::endl;
+    timer1 = timer2;
+	double fov3 = 60;
+    Vector3D up3(0, 0, 1);
+	Point3D eye3(3, 3, 2);
+	Vector3D view3(-1, 0, 0);
+	raytracer.render(width, height, eye3, view3, up3, fov3, "scene6_view3.bmp");
+	time(&timer2);
+    seconds = difftime(timer2, timer1);
+    std::cout<<"Second image rendering finished. It takes "<<seconds<<" seconds."<<std::endl;
+    timer1 = timer2;
+	double fov4 = 60;
+    Vector3D up4(-1, 0, 0);
+	Point3D eye4(0, 0, -3);
+	Vector3D view4(0, 0, 1);
+	raytracer.render(width, height, eye4, view4, up4, fov4, "scene6_view4.bmp");
+	time(&timer2);
+    seconds = difftime(timer2, timer1);
+    std::cout<<"Second image rendering finished. It takes "<<seconds<<" seconds."<<std::endl;
+#endif
+
+#ifdef SCENE7
+
+    MeshObject teapot_mesh("./obj/bunny.obj");
+    teapot_mesh.normalizeVectorCoord();
+    printf("VERTEX\n");
+    dumpvectorf(teapot_mesh.getVerts());
+    printf("FACES\n");
+    dumpvectorfaces(teapot_mesh.getFaces());
+    printf("NORMALS\n");
+    dumpvectorf(teapot_mesh.getNormals());
+    printf("TEXCOORDS\n");
+    dumpvectorf(teapot_mesh.getTexCoords());
+    printf("NUMBER OF VERTEX:%d\n", teapot_mesh.getVerts().size());
+    printf("NUMBER OF FACE:%d\n", teapot_mesh.getFaces().size()); 
+
+	raytracer.addLightSource( new PointLight(Point3D(0, 0, 15), 
+				Colour(0.6, 0.6, 0.6) ) );
+	raytracer.addLightSource( new PointLight(Point3D(4, 4, 4), 
+				Colour(0.4, 0.4, 0.4) ) );
+
+	// Add a unit square into the scene with material mat.
+	SceneDagNode* plane = raytracer.addObject( new UnitSquare(), &jade );
+	SceneDagNode* sphere = raytracer.addObject( new UnitSphere(), &gold );
+	SceneDagNode* cube = raytracer.addObject( new GeneralObject(), &gold );
+    	
+	raytracer.rotate(cube, 'x', -45); 
+	raytracer.rotate(cube, 'y', 45); 
+	raytracer.rotate(cube, 'z', 45); 
+   
+    cube->obj->setMesh(&teapot_mesh);
+    plane->mat->texture_ind = false; 
+    cube->mat->texture_ind = false; 
+    sphere->mat->texture_ind = false; 
+    plane->mat->normal_ind = false; 
+    cube->mat->normal_ind = false; 
+    sphere->mat->normal_ind = false; 
+	
+    // Apply some transformations to the unit square.
+	double factor1[3] = { 1.0, 2.0, 1.0 };
+	double factor2[3] = { 12.0, 12.0, 12.0 };
+	double factor3[3] = { 3.0, 3.0, 3.0 };
+	
+    raytracer.translate(sphere, Vector3D(0, 0, -5));	
+	raytracer.rotate(sphere, 'x', -45); 
+	raytracer.rotate(sphere, 'z', 45); 
+	raytracer.scale(sphere, Point3D(0, 0, 0), factor1);
+
+    raytracer.translate(plane, Vector3D(0, 0, -7));	
+	raytracer.rotate(plane, 'z', 45); 
+	raytracer.scale(plane, Point3D(0, 0, 0), factor2);
+	raytracer.scale(cube, Point3D(0, 0, 0), factor3);
+	
+	Vector3D up(0, 1, 0);
+	double fov = 60;
+	Point3D eye(0, 0, 14);
+	Vector3D view(0, 0, -9);
+    raytracer.render(width, height, eye, view, up, fov, "scene7_view1.bmp");
+	time(&timer2);
+	// Render it from a different point of view.
+    double seconds = difftime(timer2, timer1);
+    std::cout<<"First image rendering finished. It takes "<<seconds<<" seconds."<<std::endl;
+    timer1 = timer2;
+	Vector3D up2(0, 0, 1);
+	Point3D eye2(-5, 0, 0);
+	Vector3D view2(15, 0, 0);
+	raytracer.render(width, height, eye2, view2, up2, fov, "scene7_view2.bmp");
+	time(&timer2);
+    seconds = difftime(timer2, timer1);
+    std::cout<<"Second image rendering finished. It takes "<<seconds<<" seconds."<<std::endl;
+
+#endif
+
+
     return 0;
 }
 

@@ -34,11 +34,28 @@ void PointLight::shade( Ray3D& ray, const bool shadow) {
     v_h.normalize();
     double n = ray.intersection.mat->specular_exp;
     if (shadow)
-        ray.col = 0.3*ray.intersection.mat->diffuse*_col_ambient;
+    {
+        if (ray.intersection.mat->texture_ind)
+        {
+            ray.col = 0.3*ray.intersection.mat->texture->getColor(ray.intersection.uv);
+            if (ray.intersection.none)
+                ray.col = 0.4*ray.intersection.mat->texture->getColor(ray.intersection.uv);
+        }
+        else
+            ray.col = 0.3*ray.intersection.mat->diffuse*_col_ambient;
+    }
     else
     {
-        Colour col_d = fmax(0, v_n.dot(v_l))*ray.intersection.mat->diffuse*_col_diffuse;
         Colour col_a = ray.intersection.mat->ambient*_col_ambient;
+        Colour col_d;
+        if (ray.intersection.mat->texture_ind)
+        {
+            col_d = ray.intersection.mat->texture->getColor(ray.intersection.uv);
+            col_d = fmax(0, v_n.dot(v_l))*col_d*_col_diffuse;
+            col_a = col_d*col_a;
+        }
+        else 
+            col_d = fmax(0, v_n.dot(v_l))*ray.intersection.mat->diffuse*_col_diffuse;
 #ifdef GLOSS
         Colour col_s;
         int gloss_size = 4;
