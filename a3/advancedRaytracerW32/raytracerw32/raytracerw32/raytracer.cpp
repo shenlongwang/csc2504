@@ -87,6 +87,7 @@
 
 // define whether use participating media
 #define PARTICIPATING
+#define PHOTON 
 
 using std::vector;
 
@@ -337,7 +338,7 @@ void Raytracer::traverseScene( SceneDagNode* node, Ray3D& ray ) {
 }
 
 
-void Raytracer::generatePhotonMap(PhotonMap* photon_map) {
+void Raytracer::generatePhotonMap(PhotonMap* photon_map, int map_type) {
 	LightListNode* curLight = _lightSource;
 	// photon_map->initialPhotonMap(300);
 	// photon_map->displayPhotoMap();
@@ -354,7 +355,11 @@ void Raytracer::generatePhotonMap(PhotonMap* photon_map) {
 	int depth = 0;
 	// int photon_num_unit = 120000;
 #ifdef PARTICIPATING
-	int photon_num_unit = 60000;
+	int photon_num_unit = 30000;
+    if (map_type == 2)
+	    photon_num_unit = 30000;
+    else
+	    photon_num_unit = 60000;
     Point3D origin(16.0, 0.0, 0.0);
 #else
 	int photon_num_unit = 120000;
@@ -389,37 +394,51 @@ void Raytracer::generatePhotonMap(PhotonMap* photon_map) {
 			photon_ray.dir.normalize();
 			Photon photon_temp(photon_ray.origin, light_col, photon_ray.dir, 0);
 			tracePhoton(&photon_temp, 4);
-			if ((photon_temp.type == ABSORPTION) || (photon_temp.type == VOLUME))
+			if ((photon_temp.type == ABSORPTION)||(photon_temp.type == DIFFUSE) || (photon_temp.type == VOLUME))
 			{
-				// Specular and diffuse
-				// if ((photon_temp.specular_history != 0) || (photon_temp.diffuse_history != 0))
-				// Only specular
-				// if ((photon_temp.specular_history != 0))
-				// Only diffuse
-				// if ((photon_temp.diffuse_history != 0))
-				// Only volume
-				if (photon_temp.type == VOLUME)
-				{
-		            photon_eye = photon_temp.pos - origin;
-		            eye_ray.dir = -photon_eye;
-		            eye_ray.origin = photon_temp.pos + 0.00001 * eye_ray.dir;
-		            eye_ray.intersection.none = true;
-		            traverseScene(_root, eye_ray);
-		            if (eye_ray.intersection.none)
-                    { 
-					    photon_temp.power.clamp();
-					    photon_map->addExistPhoton(photon_temp);
-					    photon_counter++;
+                if (map_type == 2)
+                {
+                    if (photon_temp.type == VOLUME)
+                    {
+                        photon_eye = photon_temp.pos - origin;
+                        eye_ray.dir = -photon_eye;
+                        eye_ray.origin = photon_temp.pos - 0.00001 * eye_ray.dir;
+                        eye_ray.intersection.none = true;
+                        traverseScene(_root, eye_ray);
+                        if (eye_ray.intersection.none)
+                        { 
+                            photon_temp.power.clamp();
+                            photon_map->addExistPhoton(photon_temp);
+                            photon_counter++;
+                            if (photon_counter%100 == 0)
+                                std::cout<<photon_counter<<std::endl;
+                        }
                     }
-				}
+                }
+                if (map_type == 1)
+                {
+                    // Specular and diffuse
+                    // if ((photon_temp.specular_history != 0) || (photon_temp.diffuse_history != 0))
+                    // Only specular
+                    // if ((photon_temp.specular_history != 0))
+                    // Only diffuse
+                    // if ((photon_temp.diffuse_history != 0))
+                    // Only volume
+				    if ((photon_temp.specular_history != 0) || (photon_temp.diffuse_history != 0))
+                    {
+                        traverseScene(_root, photon_ray);
+                        if (!photon_ray.intersection.none && photon_ray.intersection.t_value > 0.0)
+                        {
+                        	photon_map->addNewPhoton(photon_ray.intersection.point, photon_ray.intersection.mat->diffuse, photon_ray.dir, 0);
+                        	photon_counter++;
+                            if (photon_counter%100 == 0)
+                                std::cout<<photon_counter<<std::endl;
+                        }
+                     }
+                }
+
 			}
 			
-			// traverseScene(_root, photon_ray);
-			//if (!photon_ray.intersection.none && photon_ray.intersection.t_value > 0.0)
-			//{
-			//	photon_map->addNewPhoton(photon_ray.intersection.point, photon_ray.intersection.mat->diffuse, photon_ray.dir, 0);
-			//	photon_counter++;
-			//}
 		}
 		curLight = curLight->next;
 	}
@@ -738,12 +757,14 @@ void Raytracer::tracePhoton(Photon* photon, int depth)
 				photon->power.clamp();
 				photon->type = VOLUME;
 			}
-			else
-			{
-				photon->type = OFF;
-			}
-			return;
 		}
+// #ifdef SCENE11			
+//         else
+//         {
+// 			photon->type = OFF;
+// 			return;
+//       }
+// #endif
 		// Russian roulette
 		p_sum = p_specular + p_diffuse;
 		if (p_sum > 1)
@@ -1012,7 +1033,7 @@ void Raytracer::renderPhotonMap(int width, int height, Point3D eye, Vector3D vie
 }
 
 void Raytracer::renderWithPhoton(int width, int height, Point3D eye, Vector3D view,
-	Vector3D up, double fov, char* fileName, PhotonMap* photon_map) {
+	Vector3D up, double fov, char* fileName, PhotonMap* media_map, PhotonMap* photon_map) {
 	Matrix4x4 viewToWorld;
 	_scrWidth = width;
 	_scrHeight = height;
@@ -1020,6 +1041,7 @@ void Raytracer::renderWithPhoton(int width, int height, Point3D eye, Vector3D vi
 	viewToWorld = initInvViewMatrix(eye, view, up);
 #ifdef PARTICIPATING	
 	int knn_num = 20;
+	int knn_num2 = 100;
 #else
 	int knn_num = 100;
 #endif
@@ -1078,16 +1100,17 @@ void Raytracer::renderWithPhoton(int width, int height, Point3D eye, Vector3D vi
 
 #ifdef PARTICIPATING
 
-				photon_col = photon_map->findKNNMedia(ray.origin, ray.dir, knn_num);
+				photon_col = media_map->findKNNMedia(ray.origin, ray.dir, knn_num);
 				photon_col.clamp();
 				col = col + anti_weight*photon_col;
 				col.clamp();
 
-#else			
+#endif			
+#ifdef PHOTON 
 				traverseScene(_root, ray);
 				if (!ray.intersection.none && (ray.intersection.mat->reflect == 0) && (ray.intersection.mat->refract == 0))
 				{
-					photon_col = (1 / 1200.0) * photon_map->findKNN(ray.intersection.point, knn_num);
+					photon_col = (1 / 1200.0) * photon_map->findKNN(ray.intersection.point, knn_num2);
 					// std::cout << photon_col << std::endl;
 					photon_col.clamp();
 					col = col + anti_weight*photon_col;
@@ -2055,12 +2078,13 @@ int main(int argc, char* argv[])
 
 #ifdef SCENE11
 	PhotonMap photon_map;
+	PhotonMap media_map;
 	int photon_num = 20000;
 	// photon_map.initialPhotonMap(photon_num);
 	// photon_map.displayPhotoMap();
 	// Defines a point light source.
 	raytracer.addLightSource(new PointLight(Point3D(0, 0, 12),
-		Colour(1.2, 1.2, 1.2)));
+		Colour(0.9, 0.7, 0.5)));
 	Material cornell_gray(Colour(0.0, 0.0, 0.0), Colour(0.5, 0.5, 0.5),
 		Colour(0.0, 0.0, 0.0),
 		12.8, 0.0, 0.0, 0.0);
@@ -2141,11 +2165,15 @@ int main(int argc, char* argv[])
 	Point3D eye(16, 0, 0);
 	Vector3D view(-1, 0, 0);
 	std::cout << "Generating photon map..." << std::endl;
-	raytracer.generatePhotonMap(&photon_map);
+	raytracer.generatePhotonMap(&photon_map, 1);
+	std::cout << "Generating media map..." << std::endl;
+	raytracer.generatePhotonMap(&media_map, 2);
 	std::cout << "Rendering photon map..." << std::endl;
 	raytracer.renderPhotonMap(width, height, eye, view, up, fov, "photon.bmp", &photon_map);
+	std::cout << "Rendering media map..." << std::endl;
+	raytracer.renderPhotonMap(width, height, eye, view, up, fov, "media.bmp", &media_map);
 	std::cout << "Rendering fancy image..." << std::endl;
-	// raytracer.renderWithPhoton(width, height, eye, view, up, fov, "scene8_global.bmp", &photon_map);
+	raytracer.renderWithPhoton(width, height, eye, view, up, fov, "scene8_global.bmp", &media_map, &photon_map);
 	// std::cout << "Finished" << std::endl;
 	// photon_map.displayPhotoMap();
 #endif

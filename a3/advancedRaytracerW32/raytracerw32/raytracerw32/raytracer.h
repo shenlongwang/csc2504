@@ -72,12 +72,12 @@ public:
 			Vector3D up, double fov, char* fileName );
 	// Rendering image with global illumination by photon mapping. 
 	void renderWithPhoton(int width, int height, Point3D eye, Vector3D view,
-		Vector3D up, double fov, char* fileName, PhotonMap* photon_map);
+		Vector3D up, double fov, char* fileName, PhotonMap* media_map, PhotonMap* photon_map);
 	// Rendering a simple photon map. 
 	void renderPhotonMap(int width, int height, Point3D eye, Vector3D view,
 		Vector3D up, double fov, char* fileName, PhotonMap* photon_map);
 	// generate photon map
-	void generatePhotonMap( PhotonMap* photon_map);
+	void generatePhotonMap( PhotonMap* photon_map, int map_type);
 	// trace photon
 	void tracePhoton(Photon* photon, int depth);
 

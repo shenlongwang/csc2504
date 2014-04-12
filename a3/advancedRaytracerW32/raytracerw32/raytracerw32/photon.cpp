@@ -107,9 +107,9 @@ Colour PhotonMap::findKNNMedia(Point3D eye, Vector3D ray, int num)
 	double weight = 0;
 	double weight_sum = 0;
 	// double knn_radius = pow((distance[num - 1].distance - 0.96) / 0.04, 4);
-	double knn_radius = pow((distance[num - 1].distance - 0.995) / 0.005, 4);
+	double knn_radius = pow((distance[num - 1].distance - 0.985) / 0.015, 4);
 	std::cout << knn_radius << std::endl;
-	if (double(distance[num - 1].distance < 0.995))
+	if (double(distance[num - 1].distance < 0.985))
 		return mean_color;
 	//for (int i = 0; i < num; i++)
 	//{

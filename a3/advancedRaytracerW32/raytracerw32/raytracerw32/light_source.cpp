@@ -42,7 +42,7 @@ void PointLight::shade( Ray3D& ray, const bool shadow) {
                 ray.col = 0.4*ray.intersection.mat->texture->getColor(ray.intersection.uv);
         }
         else
-            ray.col = 0.3*ray.intersection.mat->diffuse*_col_ambient;
+            ray.col = 0.1*ray.intersection.mat->diffuse*_col_ambient;
     }
     else
     {
