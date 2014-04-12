@@ -45,7 +45,8 @@
 // #define SCENE7
 // #define SCENE8
 // #define SCENE9
-#define SCENE10
+// #define SCENE10
+#define SCENE11
 
 //---------------------------------------------------------------------------------
 
@@ -354,12 +355,15 @@ void Raytracer::generatePhotonMap(PhotonMap* photon_map) {
 	// int photon_num_unit = 120000;
 #ifdef PARTICIPATING
 	int photon_num_unit = 60000;
+    Point3D origin(16.0, 0.0, 0.0);
 #else
 	int photon_num_unit = 120000;
 #endif
 	int photon_num = 0;
 	int photon_counter = 0;
 	Ray3D photon_ray;
+    Ray3D eye_ray;
+    Vector3D photon_eye;
 	for (light_ind = 1; light_ind < 100; light_ind++) 
 	{
 		
@@ -396,11 +400,17 @@ void Raytracer::generatePhotonMap(PhotonMap* photon_map) {
 				// Only volume
 				if (photon_temp.type == VOLUME)
 				{
-					photon_temp.power.clamp();
-					photon_map->addExistPhoton(photon_temp);
-					photon_counter++;
-					if (!photon_counter % 1000)
-						cout << "Already generated " << photon_counter << " photons" << std::endl;
+		            photon_eye = photon_temp.pos - origin;
+		            eye_ray.dir = -photon_eye;
+		            eye_ray.origin = photon_temp.pos + 0.00001 * eye_ray.dir;
+		            eye_ray.intersection.none = true;
+		            traverseScene(_root, eye_ray);
+		            if (eye_ray.intersection.none)
+                    { 
+					    photon_temp.power.clamp();
+					    photon_map->addExistPhoton(photon_temp);
+					    photon_counter++;
+                    }
 				}
 			}
 			
@@ -700,7 +710,11 @@ void Raytracer::tracePhoton(Photon* photon, int depth)
 	Vector3D reflect_v, refract_v;
 	if (!photon_ray.intersection.none && photon_ray.intersection.t_value > 0.0)
 	{
+#ifdef SCENE11
+		double toss = (double)rand() / (RAND_MAX) * 30.0 + 5;
+#else
 		double toss = (double)rand() / (RAND_MAX) * 15.0;
+#endif
 		denominator = fmax(fmax(photon->power[0], photon->power[1]), photon->power[2]) + DBL_EPSILON;
 		// the probability of diffuse reflection
 		col_diffuse = photon_ray.intersection.mat->diffuse * photon->power;
@@ -713,7 +727,11 @@ void Raytracer::tracePhoton(Photon* photon, int depth)
 		if ((p_specular < 0.2) && (photon_ray.intersection.t_value > toss)) // exponetial distribution
 		{
 			double toss2 = (double)rand() / (RAND_MAX);
+#ifdef SCENE11			
+            if (exp(-(toss-5)/8) > toss2 && depth == 4)
+#else
 			if (exp(-toss/2) > toss2 && depth == 4)
+#endif
 			{
 				photon->pos = photon->pos + toss*photon->dir;
 				photon->power = Colour(0.9, 0.7, 0.5);
@@ -2035,13 +2053,13 @@ int main(int argc, char* argv[])
 #endif
 
 
-#ifdef SCENE10
+#ifdef SCENE11
 	PhotonMap photon_map;
 	int photon_num = 20000;
 	// photon_map.initialPhotonMap(photon_num);
 	// photon_map.displayPhotoMap();
 	// Defines a point light source.
-	raytracer.addLightSource(new PointLight(Point3D(0, 0, 5.8),
+	raytracer.addLightSource(new PointLight(Point3D(0, 0, 12),
 		Colour(1.2, 1.2, 1.2)));
 	Material cornell_gray(Colour(0.0, 0.0, 0.0), Colour(0.5, 0.5, 0.5),
 		Colour(0.0, 0.0, 0.0),
@@ -2070,52 +2088,34 @@ int main(int argc, char* argv[])
 	cornell_glossy.glossy_ind = true;
 	// Add a unit square into the scene with material mat.
 	SceneDagNode* plane_right = raytracer.addObject(new UnitSquare(), &cornell_red);
-	SceneDagNode* plane_light = raytracer.addObject(new UnitSquare(), &cornell_white);
-	SceneDagNode* plane_up = raytracer.addObject(new UnitSquare(), &cornell_gray);
+	SceneDagNode* plane_up = raytracer.addObject(new UnitWindow(), &cornell_gray);
 	SceneDagNode* plane_left = raytracer.addObject(new UnitSquare(), &cornell_blue);
 	SceneDagNode* plane_down = raytracer.addObject(new UnitSquare(), &cornell_gray);
 	SceneDagNode* plane_front = raytracer.addObject(new UnitSquare(), &cornell_gray);
 
-	SceneDagNode* sphere_gray1 = raytracer.addObject(new UnitSphere(), &cornell_yellow);
-	SceneDagNode* sphere_gray2 = raytracer.addObject(new UnitSphere(), &cornell_red);
 	SceneDagNode* sphere_mirror = raytracer.addObject(new UnitSphere(), &cornell_mirror);
 	SceneDagNode* sphere_glossy = raytracer.addObject(new UnitSphere(), &cornell_glass);
 	SceneDagNode* cube = raytracer.addObject(new UnitCube(), &cornell_mirror);
 
-	// Apply some transformations to the unit square.
 	double factor1[3] = { 2.0, 2.0, 2.0 };
 	double factor2[3] = { 12.0, 12.0, 12.0 };
 	double factor3[3] = { 1.2, 1.2, 3.0 };
 	double factor4[3] = { 0.6, 0.6, 0.6 };
 	double factor5[3] = { 0.8, 0.8, 0.8 };
-
-
-	raytracer.translate(sphere_gray1, Vector3D(-1, 2, 4));
-	raytracer.translate(sphere_gray2, Vector3D(0.5, -1, 3));
-	raytracer.translate(sphere_mirror, Vector3D(-3, -3, -4));
+	
+    raytracer.translate(sphere_mirror, Vector3D(-3, -3, -4));
 	// raytracer.translate(sphere_glass, Vector3D(4.5, 0, -5));
 	raytracer.translate(sphere_glossy, Vector3D(1, 3.5, -4));
 	// raytracer.translate(cone, Vector3D(2, -2, -6));
 	raytracer.translate(cube, Vector3D(3, 0, -5));
 	raytracer.rotate(cube, 'z', 30);
 
-	//raytracer.translate(sphere_mirror, Vector3D(-3, -3, -4));
-	//// raytracer.translate(sphere_glass, Vector3D(4.5, 0, -5));
-	//raytracer.translate(sphere_glossy, Vector3D(-1, 2, -4));
-	//raytracer.translate(cube, Vector3D(3, 4, -5));
-	//raytracer.rotate(cube, 'z', 30);
-	raytracer.scale(sphere_gray1, Point3D(0, 0, 0), factor4);
-	raytracer.scale(sphere_gray2, Point3D(0, 0, 0), factor5);
-
 	raytracer.scale(sphere_mirror, Point3D(0, 0, 0), factor1);
 	raytracer.scale(sphere_glossy, Point3D(0, 0, 0), factor1);
+	// Apply some transformations to the unit square.
 
 	raytracer.translate(plane_down, Vector3D(0, 0, -6));
 	raytracer.scale(plane_down, Point3D(0, 0, 0), factor2);
-
-	raytracer.translate(plane_light, Vector3D(0, 0, 5.9));
-	raytracer.rotate(plane_light, 'y', 180);
-	raytracer.scale(plane_light, Point3D(0, 0, 0), factor1);
 
 	raytracer.translate(plane_up, Vector3D(0, 0, 6));
 	raytracer.rotate(plane_up, 'y', 180);
@@ -2145,8 +2145,8 @@ int main(int argc, char* argv[])
 	std::cout << "Rendering photon map..." << std::endl;
 	raytracer.renderPhotonMap(width, height, eye, view, up, fov, "photon.bmp", &photon_map);
 	std::cout << "Rendering fancy image..." << std::endl;
-	raytracer.renderWithPhoton(width, height, eye, view, up, fov, "scene8_global.bmp", &photon_map);
-	std::cout << "Finished" << std::endl;
+	// raytracer.renderWithPhoton(width, height, eye, view, up, fov, "scene8_global.bmp", &photon_map);
+	// std::cout << "Finished" << std::endl;
 	// photon_map.displayPhotoMap();
 #endif
 

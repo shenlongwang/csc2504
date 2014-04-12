@@ -65,3 +65,13 @@ public:
 	bool intersect(Ray3D& ray, const Matrix4x4& worldToModel,
 		const Matrix4x4& modelToWorld);
 };
+class UnitWindow : public SceneObject {
+public:
+	bool intersect(Ray3D& ray, const Matrix4x4& worldToModel,
+		const Matrix4x4& modelToWorld);
+};
+class UnitWater : public SceneObject {
+public:
+	bool intersect(Ray3D& ray, const Matrix4x4& worldToModel,
+		const Matrix4x4& modelToWorld);
+};
