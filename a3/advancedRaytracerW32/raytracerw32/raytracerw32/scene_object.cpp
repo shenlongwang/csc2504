@@ -619,3 +619,51 @@ bool UnitWindow::intersect( Ray3D& ray, const Matrix4x4& worldToModel,
       ray.intersection.t_value = t;
       return true;
 }
+
+bool UnitTextureSquare::intersect( Ray3D& ray, const Matrix4x4& worldToModel,
+		const Matrix4x4& modelToWorld ) {
+	// TODO: implement intersection code for UnitSquare, which is
+	// defined on the xy-plane, with vertices (0.5, 0.5, 0), 
+	// (-0.5, 0.5, 0), (-0.5, -0.5, 0), (0.5, -0.5, 0), and normal
+	// (0, 0, 1).
+	//
+	// Your goal here is to fill ray.intersection with correct values
+	// should an intersection occur.  This includes intersection.point, 
+	// intersection.normal, intersection.none, intersection.t_value.   
+	//
+	// HINT: Remember to first transform the ray into object space  
+	// to simplify the intersection test.
+
+      Vector3D v_d = worldToModel*ray.dir;
+      Point3D p_o = worldToModel*ray.origin;
+      float t = - p_o[2]/v_d[2];
+      Point3D p_i = p_o + t * v_d;
+      
+      if (!ray.intersection.none && ray.intersection.t_value < t)
+      {
+          return false;
+      }
+      if (t < 0)
+      {
+          return false;
+      }
+      if ((p_i[0] > 0.5)||(p_i[1]>0.5))
+      {
+          return false;
+      }
+      if ((p_i[0] < -0.5)||(p_i[1]<-0.5))
+      {
+          return false;
+      }
+      Vector3D v_n(0.0, 0.0, 1.0);
+      v_n.normalize();
+      ray.intersection.point = modelToWorld * p_i;
+      ray.intersection.uv[0] = p_i[0] - 0.5;
+      ray.intersection.uv[1] = p_i[1] - 0.5;
+      // ray.intersection.normal = transNorm(modelToWorld, v_n); 
+      ray.intersection.normal = transNorm(worldToModel, v_n); 
+      ray.intersection.normal.normalize(); 
+      ray.intersection.none = false;
+      ray.intersection.t_value = t;
+      return true;
+}

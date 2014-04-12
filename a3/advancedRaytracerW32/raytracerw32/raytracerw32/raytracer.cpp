@@ -36,7 +36,7 @@
 //---------------------------------------------------------------------------------
 // define the scene to render, please only enable one each time.
 
-// #define SCENE1
+// #define SCENE1 // Mirror box
 // #define SCENE2
 // #define SCENE3
 // #define SCENE4
@@ -2116,6 +2116,113 @@ int main(int argc, char* argv[])
 	SceneDagNode* plane_left = raytracer.addObject(new UnitSquare(), &cornell_blue);
 	SceneDagNode* plane_down = raytracer.addObject(new UnitSquare(), &cornell_gray);
 	SceneDagNode* plane_front = raytracer.addObject(new UnitSquare(), &cornell_gray);
+
+	SceneDagNode* sphere_mirror = raytracer.addObject(new UnitSphere(), &cornell_mirror);
+	SceneDagNode* sphere_glossy = raytracer.addObject(new UnitSphere(), &cornell_glass);
+	SceneDagNode* cube = raytracer.addObject(new UnitCube(), &cornell_mirror);
+
+	double factor1[3] = { 2.0, 2.0, 2.0 };
+	double factor2[3] = { 12.0, 12.0, 12.0 };
+	double factor3[3] = { 1.2, 1.2, 3.0 };
+	double factor4[3] = { 0.6, 0.6, 0.6 };
+	double factor5[3] = { 0.8, 0.8, 0.8 };
+	
+    raytracer.translate(sphere_mirror, Vector3D(-3, -3, -4));
+	// raytracer.translate(sphere_glass, Vector3D(4.5, 0, -5));
+	raytracer.translate(sphere_glossy, Vector3D(1, 3.5, -4));
+	// raytracer.translate(cone, Vector3D(2, -2, -6));
+	raytracer.translate(cube, Vector3D(3, 0, -5));
+	raytracer.rotate(cube, 'z', 30);
+
+	raytracer.scale(sphere_mirror, Point3D(0, 0, 0), factor1);
+	raytracer.scale(sphere_glossy, Point3D(0, 0, 0), factor1);
+	// Apply some transformations to the unit square.
+
+	raytracer.translate(plane_down, Vector3D(0, 0, -6));
+	raytracer.scale(plane_down, Point3D(0, 0, 0), factor2);
+
+	raytracer.translate(plane_up, Vector3D(0, 0, 6));
+	raytracer.rotate(plane_up, 'y', 180);
+	raytracer.scale(plane_up, Point3D(0, 0, 0), factor2);
+
+	raytracer.translate(plane_front, Vector3D(-6, 0, 0));
+	raytracer.rotate(plane_front, 'y', 90);
+	raytracer.scale(plane_front, Point3D(0, 0, 0), factor2);
+
+	raytracer.translate(plane_left, Vector3D(0, 6, 0));
+	raytracer.rotate(plane_left, 'x', 90);
+	raytracer.scale(plane_left, Point3D(0, 0, 0), factor2);
+
+	raytracer.translate(plane_right, Vector3D(0, -6, 0));
+	raytracer.rotate(plane_right, 'x', -90);
+	raytracer.scale(plane_right, Point3D(0, 0, 0), factor2);
+
+	// Render the scene, feel free to make the image smaller for
+	// testing purposes.
+	// Camera parameters.
+	Vector3D up(0, 0, 1);
+	double fov = 60;
+	Point3D eye(16, 0, 0);
+	Vector3D view(-1, 0, 0);
+	std::cout << "Generating photon map..." << std::endl;
+	raytracer.generatePhotonMap(&photon_map, 1);
+	std::cout << "Generating media map..." << std::endl;
+	raytracer.generatePhotonMap(&media_map, 2);
+	std::cout << "Rendering photon map..." << std::endl;
+	raytracer.renderPhotonMap(width, height, eye, view, up, fov, "photon.bmp", &photon_map);
+	std::cout << "Rendering media map..." << std::endl;
+	raytracer.renderPhotonMap(width, height, eye, view, up, fov, "media.bmp", &media_map);
+	std::cout << "Rendering fancy image..." << std::endl;
+	raytracer.renderWithPhoton(width, height, eye, view, up, fov, "scene8_global.bmp", &media_map, &photon_map);
+	// std::cout << "Finished" << std::endl;
+	// photon_map.displayPhotoMap();
+#endif
+#ifdef SCENE12
+	PhotonMap photon_map;
+	PhotonMap media_map;
+	int photon_num = 20000;
+	// photon_map.initialPhotonMap(photon_num);
+	// photon_map.displayPhotoMap();
+	// Defines a point light source.
+	raytracer.addLightSource(new PointLight(Point3D(0, 0, 6),
+		Colour(0.9, 0.7, 0.5)));
+	Material cornell_gray(Colour(0.0, 0.0, 0.0), Colour(0.5, 0.5, 0.5),
+		Colour(0.0, 0.0, 0.0),
+		12.8, 0.0, 0.0, 0.0);
+	Material cornell_white(Colour(1.0, 1.0, 1.0), Colour(1.0, 1.0, 1.0),
+		Colour(0.0, 0.0, 0.0),
+		12.8, 0.0, 0.0, 0.0);
+	Material cornell_red(Colour(0.0, 0.0, 0.0), Colour(1.0, 0.0, 0.4),
+		Colour(0.0, 0.0, 0.0),
+		12.8, 0.0, 0.0, 0.0);
+	Material cornell_yellow(Colour(0.0, 0.0, 0.0), Colour(0.7, 0.9, 0.0),
+		Colour(0.116228, 0.116228, 0.116228),
+		12.8, 0.0, 0.0, 0.0);
+	Material cornell_blue(Colour(0.0, 0.0, 0.0), Colour(0.0, 0.4, 1.0),
+		Colour(0.0, 0.0, 0.0),
+		12.8, 0.0, 0.0, 0.0);
+	Material cornell_mirror(Colour(0.0, 0.0, 0.0), Colour(0.0, 0.0, 0.0),
+		Colour(1.0, 1.0, 1.0),
+		52.8, 1.0, 0.0, 0.0);
+	Material cornell_glass(Colour(0.0, 0.0, 0.0), Colour(0.0, 0.0, 0.0),
+		Colour(1.0, 1.0, 1.0),
+		52.8, 0.1, 1.0, 1.28);
+	Material cornell_glossy(Colour(0.0, 0.0, 0.0), Colour(0.0, 0.0, 0.0),
+		Colour(0.8, 0.8, 0.8),
+		52.8, 1.0, 0.0, 1.8);
+	cornell_glossy.glossy_ind = true;
+	cornell_glossy.texture_ind = true;
+    Texture texture_floor;
+	// Add a unit square into the scene with material mat.
+	SceneDagNode* plane_right = raytracer.addObject(new UnitSquare(), &cornell_red);
+	SceneDagNode* plane_up = raytracer.addObject(new UnitWindow(), &cornell_gray);
+	SceneDagNode* plane_left = raytracer.addObject(new UnitSquare(), &cornell_blue);
+	SceneDagNode* plane_down = raytracer.addObject(new UnitTextureSquare(), &cornell_gray);
+	SceneDagNode* plane_front = raytracer.addObject(new UnitSquare(), &cornell_gray);
+    
+    texture_floor.readImage("./Textures/texture1.bmp");
+    plane_down->mat->texture = &moontex;  
+    plane_down->mat->texture_ind = true; 
 
 	SceneDagNode* sphere_mirror = raytracer.addObject(new UnitSphere(), &cornell_mirror);
 	SceneDagNode* sphere_glossy = raytracer.addObject(new UnitSphere(), &cornell_glass);
