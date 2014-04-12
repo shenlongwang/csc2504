@@ -20,7 +20,7 @@
 #include <ctime>
 #include <iostream>
 #include <cstdlib>
-
+#include <float.h>
 //---------------------------------------------------------------------------------
 // define parameters for shading, does not mean disable PHONG shading
 #define SHADOW true 
