@@ -54,7 +54,7 @@
 //---------------------------------------------------------------------------------
 
 // define the resolution.
-#define SMALL
+// #define SMALL
 // #define SMALL_CUBE
 #define LARGE_CUBE
 
@@ -1844,8 +1844,8 @@ int main(int argc, char* argv[])
 	// Add a unit square into the scene with material mat.
 	SceneDagNode* plane = raytracer.addObject( new UnitSquare(), &jade_mirror );
 	SceneDagNode* cube2 = raytracer.addObject(new GeneralObject(), &gold);
-	SceneDagNode* cube = raytracer.addObject( new GeneralObject(), &red );
-	SceneDagNode* cube3 = raytracer.addObject(new GeneralObject(), &blue);
+	SceneDagNode* cube = raytracer.addObject( new GeneralObject(), &mirror );
+	SceneDagNode* cube3 = raytracer.addObject(new GeneralObject(), &glass);
 	raytracer.translate(cube3, Vector3D(-4, 0, 0));
 	raytracer.translate(cube2, Vector3D(4, 0, 0));
 

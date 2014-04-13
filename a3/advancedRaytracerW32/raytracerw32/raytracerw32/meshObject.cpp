@@ -1,6 +1,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <cmath>
+#include <cstring>
 #include "meshObject.h"
 
 #define MAX_LINE_SIZE 256
