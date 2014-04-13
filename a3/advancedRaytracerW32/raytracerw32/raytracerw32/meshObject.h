@@ -65,6 +65,9 @@ class MeshObject{
        void readNormal(const char* objString);
        void readTexCoord(const char* objString);
        void readFace(const char* objString);
+	   void readFace4(const char* objString);
+	   void readFaceTexture(const char* objString);
+
        void getNextElement(const char* buffer);
 
        void readObj(const char* filename);

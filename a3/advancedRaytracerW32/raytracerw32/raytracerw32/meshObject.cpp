@@ -4,7 +4,9 @@
 #include "meshObject.h"
 
 #define MAX_LINE_SIZE 256
-
+// #define QUADMESH
+// #define INCLUDE_TEXTURE
+#define NORMALMESH
 MeshObject::MeshObject(const char* filename)
 {
     readObj(filename);
@@ -54,7 +56,15 @@ void MeshObject::getNextElement(const char* buffer)
             break;
 
         case PARSED_ELEMENT_FACE:
-            readFace(buffer);
+#ifdef QUADMESH
+            readFace4(buffer);
+#endif
+#ifdef INCLUDE_TEXTURE
+			readFaceTexture(buffer);
+#endif
+#ifdef NORMALMESH
+			readFace(buffer);
+#endif
             break;
 
         //ignore
@@ -99,11 +109,74 @@ void MeshObject::readFace(const char* objString)
         f.verts.coords,f.normals.coords,
         f.verts.coords+1,f.normals.coords+1,
         f.verts.coords+2,f.normals.coords+2);
-
     normalizeFaceIndexes(f);
     faces.push_back(f);
+}
+
+void MeshObject::readFaceTexture(const char* objString)
+{
+	Face f;
+	Face f2;
+	//this looks worse than I expected
+	sscanf(objString, "f %d/%d/%d %d/%d/%d %d/%d/%d %d/%d/%d\n",
+		f.verts.coords, f.texCoords.coords, f.normals.coords,
+		f.verts.coords + 1, f.texCoords.coords + 1, f.normals.coords + 1,
+		f.verts.coords + 2, f.texCoords.coords + 2, f.normals.coords + 2, 
+		f2.verts.coords, f2.texCoords.coords, f2.normals.coords);
+		f2.verts.coords[1] = f.verts.coords[0];
+		f2.verts.coords[2] = f.verts.coords[2];
+		f2.normals.coords[1] = f.normals.coords[0];
+		f2.normals.coords[2] = f.normals.coords[2];
+		f2.texCoords.coords[1] = f.texCoords.coords[0];
+		f2.texCoords.coords[2] = f.texCoords.coords[2];
+	normalizeFaceIndexes(f);
+	normalizeFaceIndexes(f2);
+	faces.push_back(f);
+	faces.push_back(f2);
+}
+
+
+void MeshObject::readFace4(const char* objString)
+{
+	Face f;
+	int a, b, c, d;
+	//this looks worse than I expected
+	int obj_len = strlen(objString);
+	int slash_num = 0;
+	for (size_t i = 0; i < obj_len; i++)
+	{
+		if (objString[i] == '/')
+			slash_num++;
+	}
+	if (slash_num == 4)
+	{
+		Face f2;
+		sscanf(objString, "f %d/%d %d/%d %d/%d %d/%d\n",
+			f.verts.coords, f.normals.coords,
+			f.verts.coords + 1, f.normals.coords + 1,
+			f.verts.coords + 2, f.normals.coords + 2,
+			f2.verts.coords, f2.normals.coords);
+		f2.verts.coords[1] = f.verts.coords[0];
+		f2.verts.coords[2] = f.verts.coords[2];
+		f2.normals.coords[1] = f.normals.coords[0];
+		f2.normals.coords[2] = f.normals.coords[2];
+		normalizeFaceIndexes(f2);
+		normalizeFaceIndexes(f);
+		faces.push_back(f);
+		faces.push_back(f2);
+	}
+	else
+	{
+		sscanf(objString, "f %d/%d %d/%d %d/%d\n",
+			f.verts.coords, f.normals.coords,
+			f.verts.coords + 1, f.normals.coords + 1,
+			f.verts.coords + 2, f.normals.coords + 2);
+		normalizeFaceIndexes(f);
+		faces.push_back(f);
+	}
 
 }
+
 
 void MeshObject::normalizeFaceIndexes(Face& f)
 {

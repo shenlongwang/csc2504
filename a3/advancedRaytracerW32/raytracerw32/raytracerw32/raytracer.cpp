@@ -42,11 +42,14 @@
 // #define SCENE4
 // #define SCENE5
 // #define SCENE6
-// #define SCENE7
-// #define SCENE8
-// #define SCENE9
-// #define SCENE10
-#define SCENE11
+#define SCENE7 // Arbitrary Mesh
+// #define SCENE8 // Photon map
+// #define SCENE9 // Caustics
+// #define SCENE10 // Fog
+// #define SCENE11 // Caustics + Fog
+// #define SCENE12 // Caustics + Fog + Texture
+// #define SCENE13 // Caustics Water
+
 
 //---------------------------------------------------------------------------------
 
@@ -70,7 +73,7 @@
 //---------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------
 // define whether soft shadow is on
-#define SOFT_SHADOW
+// #define SOFT_SHADOW
 //---------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------
 // define whether anti-aliasing is on 
@@ -82,7 +85,7 @@
 //---------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------
 // define whether refraction is on 
- #define REFRACTION 
+#define REFRACTION 
 //---------------------------------------------------------------------------------
 
 // define whether use participating media
@@ -1147,8 +1150,8 @@ int main(int argc, char* argv[])
 	// int height = 1080; 
 #endif
 #ifdef SMALL_CUBE
-	width = 64;
-	height = 64;
+	width = 30;
+	height = 30;
 #endif
 #ifdef LARGE_CUBE
 	width = 1024;
@@ -1817,18 +1820,19 @@ int main(int argc, char* argv[])
     std::cout<<"Second image rendering finished. It takes "<<seconds<<" seconds."<<std::endl;
 #endif
 
-#ifdef SCENE7
-
-    MeshObject teapot_mesh("./obj/bunny.obj");
-    teapot_mesh.normalizeVectorCoord();
-    printf("VERTEX\n");
-    dumpvectorf(teapot_mesh.getVerts());
-    printf("FACES\n");
-    dumpvectorfaces(teapot_mesh.getFaces());
-    printf("NORMALS\n");
-    dumpvectorf(teapot_mesh.getNormals());
-    printf("TEXCOORDS\n");
-    dumpvectorf(teapot_mesh.getTexCoords());
+#ifdef SCENE7 // load arbitrary mesh
+    // MeshObject teapot_mesh("./obj/teapot.obj");
+	MeshObject teapot_mesh("./obj/bunny.obj");
+	// MeshObject teapot_mesh("./obj/mario.obj");
+	//teapot_mesh.normalizeVectorCoord();
+	//   printf("VERTEX\n");
+	//   dumpvectorf(teapot_mesh.getVerts());
+	//   printf("FACES\n");
+	//   dumpvectorfaces(teapot_mesh.getFaces());
+	//   printf("NORMALS\n");
+	//   dumpvectorf(teapot_mesh.getNormals());
+	//   printf("TEXCOORDS\n");
+	//   dumpvectorf(teapot_mesh.getTexCoords());
     printf("NUMBER OF VERTEX:%d\n", teapot_mesh.getVerts().size());
     printf("NUMBER OF FACE:%d\n", teapot_mesh.getFaces().size()); 
 
@@ -1838,54 +1842,60 @@ int main(int argc, char* argv[])
 				Colour(0.4, 0.4, 0.4) ) );
 
 	// Add a unit square into the scene with material mat.
-	SceneDagNode* plane = raytracer.addObject( new UnitSquare(), &jade );
-	SceneDagNode* sphere = raytracer.addObject( new UnitSphere(), &gold );
-	SceneDagNode* cube = raytracer.addObject( new GeneralObject(), &gold );
-    	
-	raytracer.rotate(cube, 'x', -45); 
+	SceneDagNode* plane = raytracer.addObject( new UnitSquare(), &jade_mirror );
+	SceneDagNode* cube2 = raytracer.addObject(new GeneralObject(), &gold);
+	SceneDagNode* cube = raytracer.addObject( new GeneralObject(), &red );
+	SceneDagNode* cube3 = raytracer.addObject(new GeneralObject(), &blue);
+	raytracer.translate(cube3, Vector3D(-4, 0, 0));
+	raytracer.translate(cube2, Vector3D(4, 0, 0));
+
+	raytracer.rotate(cube, 'x', -45);
 	raytracer.rotate(cube, 'y', 45); 
 	raytracer.rotate(cube, 'z', 45); 
+	raytracer.rotate(cube2, 'x', -30);
+	raytracer.rotate(cube2, 'y', -45);
+	raytracer.rotate(cube2, 'z', 70);
+	raytracer.rotate(cube3, 'x', 0);
+	raytracer.rotate(cube3, 'y', 0);
+	raytracer.rotate(cube3, 'z', 0);
    
     cube->obj->setMesh(&teapot_mesh);
+	cube2->obj->setMesh(&teapot_mesh);
+	cube3->obj->setMesh(&teapot_mesh);
     plane->mat->texture_ind = false; 
     cube->mat->texture_ind = false; 
-    sphere->mat->texture_ind = false; 
     plane->mat->normal_ind = false; 
     cube->mat->normal_ind = false; 
-    sphere->mat->normal_ind = false; 
-	
+	cube2->mat->texture_ind = false;
+	cube2->mat->texture_ind = false;
+	cube3->mat->normal_ind = false;
+	cube3->mat->normal_ind = false;
+
+
     // Apply some transformations to the unit square.
 	double factor1[3] = { 1.0, 2.0, 1.0 };
 	double factor2[3] = { 12.0, 12.0, 12.0 };
-	double factor3[3] = { 3.0, 3.0, 3.0 };
+	double factor3[3] = { 1.0, 1.0, 1.0 };
 	
-    raytracer.translate(sphere, Vector3D(0, 0, -5));	
-	raytracer.rotate(sphere, 'x', -45); 
-	raytracer.rotate(sphere, 'z', 45); 
-	raytracer.scale(sphere, Point3D(0, 0, 0), factor1);
 
-    raytracer.translate(plane, Vector3D(0, 0, -7));	
+	raytracer.translate(plane, Vector3D(0, 0, -4));
+
 	raytracer.rotate(plane, 'z', 45); 
 	raytracer.scale(plane, Point3D(0, 0, 0), factor2);
 	raytracer.scale(cube, Point3D(0, 0, 0), factor3);
+	raytracer.scale(cube2, Point3D(0, 0, 0), factor3);
+	raytracer.scale(cube3, Point3D(0, 0, 0), factor3);
+
 	
 	Vector3D up(0, 1, 0);
 	double fov = 60;
-	Point3D eye(0, 0, 14);
-	Vector3D view(0, 0, -9);
+	Point3D eye(0, 0, 12);
+	Vector3D view(0, 0, -1);
     raytracer.render(width, height, eye, view, up, fov, "scene7_view1.bmp");
 	time(&timer2);
 	// Render it from a different point of view.
     double seconds = difftime(timer2, timer1);
     std::cout<<"First image rendering finished. It takes "<<seconds<<" seconds."<<std::endl;
-    timer1 = timer2;
-	Vector3D up2(0, 0, 1);
-	Point3D eye2(-5, 0, 0);
-	Vector3D view2(15, 0, 0);
-	raytracer.render(width, height, eye2, view2, up2, fov, "scene7_view2.bmp");
-	time(&timer2);
-    seconds = difftime(timer2, timer1);
-    std::cout<<"Second image rendering finished. It takes "<<seconds<<" seconds."<<std::endl;
 
 #endif
 
@@ -1977,7 +1987,7 @@ int main(int argc, char* argv[])
 	std::cout << "Finished" << std::endl;
 #endif
 
-#ifdef SCENE9
+#ifdef SCENE9 // caustics
 	PhotonMap photon_map;
 	int photon_num = 20000;
 	// photon_map.initialPhotonMap(photon_num);
@@ -2076,7 +2086,7 @@ int main(int argc, char* argv[])
 #endif
 
 
-#ifdef SCENE11
+#ifdef SCENE11 // Cornell box with participating media(fog)
 	PhotonMap photon_map;
 	PhotonMap media_map;
 	int photon_num = 20000;
@@ -2177,7 +2187,7 @@ int main(int argc, char* argv[])
 	// std::cout << "Finished" << std::endl;
 	// photon_map.displayPhotoMap();
 #endif
-#ifdef SCENE12
+#ifdef SCENE12 // cornell box with fog and caustics
 	PhotonMap photon_map;
 	PhotonMap media_map;
 	int photon_num = 20000;
@@ -2285,6 +2295,186 @@ int main(int argc, char* argv[])
 	// photon_map.displayPhotoMap();
 #endif
 
+#ifdef SCENE13 // Cornell box with Water
+	PhotonMap photon_map;
+	PhotonMap media_map;
+	int photon_num = 20000;
+	// photon_map.initialPhotonMap(photon_num);
+	// photon_map.displayPhotoMap();
+	// Defines a point light source.
+	raytracer.addLightSource(new PointLight(Point3D(0, 0, 6),
+		Colour(0.9, 0.7, 0.5)));
+	Material cornell_gray(Colour(0.0, 0.0, 0.0), Colour(0.5, 0.5, 0.5),
+		Colour(0.0, 0.0, 0.0),
+		12.8, 0.0, 0.0, 0.0);
+	Material cornell_white(Colour(1.0, 1.0, 1.0), Colour(1.0, 1.0, 1.0),
+		Colour(0.0, 0.0, 0.0),
+		12.8, 0.0, 0.0, 0.0);
+	Material cornell_red(Colour(0.0, 0.0, 0.0), Colour(1.0, 0.0, 0.4),
+		Colour(0.0, 0.0, 0.0),
+		12.8, 0.0, 0.0, 0.0);
+	Material cornell_yellow(Colour(0.0, 0.0, 0.0), Colour(0.7, 0.9, 0.0),
+		Colour(0.116228, 0.116228, 0.116228),
+		12.8, 0.0, 0.0, 0.0);
+	Material cornell_blue(Colour(0.0, 0.0, 0.0), Colour(0.0, 0.4, 1.0),
+		Colour(0.0, 0.0, 0.0),
+		12.8, 0.0, 0.0, 0.0);
+	Material cornell_mirror(Colour(0.0, 0.0, 0.0), Colour(0.0, 0.0, 0.0),
+		Colour(1.0, 1.0, 1.0),
+		52.8, 1.0, 0.0, 0.0);
+	Material cornell_glass(Colour(0.0, 0.0, 0.0), Colour(0.0, 0.0, 0.0),
+		Colour(1.0, 1.0, 1.0),
+		52.8, 0.1, 1.0, 1.28);
+	Material cornell_glossy(Colour(0.0, 0.0, 0.0), Colour(0.0, 0.0, 0.0),
+		Colour(0.8, 0.8, 0.8),
+		52.8, 1.0, 0.0, 1.8);
+	cornell_glossy.glossy_ind = true;
+	cornell_glossy.texture_ind = true;
+	Texture texture_floor;
+	// Add a unit square into the scene with material mat.
+	SceneDagNode* plane_right = raytracer.addObject(new UnitSquare(), &cornell_red);
+	SceneDagNode* plane_up = raytracer.addObject(new UnitWindow(), &cornell_gray);
+	SceneDagNode* plane_left = raytracer.addObject(new UnitSquare(), &cornell_blue);
+	SceneDagNode* plane_down = raytracer.addObject(new UnitTextureSquare(), &cornell_gray);
+	SceneDagNode* plane_front = raytracer.addObject(new UnitSquare(), &cornell_gray);
+
+	texture_floor.readImage("./Textures/texture1.bmp");
+	plane_down->mat->texture = &moontex;
+	plane_down->mat->texture_ind = true;
+
+	SceneDagNode* sphere_mirror = raytracer.addObject(new UnitSphere(), &cornell_mirror);
+	SceneDagNode* sphere_glossy = raytracer.addObject(new UnitSphere(), &cornell_glass);
+	SceneDagNode* cube = raytracer.addObject(new UnitCube(), &cornell_mirror);
+
+	double factor1[3] = { 2.0, 2.0, 2.0 };
+	double factor2[3] = { 12.0, 12.0, 12.0 };
+	double factor3[3] = { 1.2, 1.2, 3.0 };
+	double factor4[3] = { 0.6, 0.6, 0.6 };
+	double factor5[3] = { 0.8, 0.8, 0.8 };
+
+	raytracer.translate(sphere_mirror, Vector3D(-3, -3, -4));
+	// raytracer.translate(sphere_glass, Vector3D(4.5, 0, -5));
+	raytracer.translate(sphere_glossy, Vector3D(1, 3.5, -4));
+	// raytracer.translate(cone, Vector3D(2, -2, -6));
+	raytracer.translate(cube, Vector3D(3, 0, -5));
+	raytracer.rotate(cube, 'z', 30);
+
+	raytracer.scale(sphere_mirror, Point3D(0, 0, 0), factor1);
+	raytracer.scale(sphere_glossy, Point3D(0, 0, 0), factor1);
+	// Apply some transformations to the unit square.
+
+	raytracer.translate(plane_down, Vector3D(0, 0, -6));
+	raytracer.scale(plane_down, Point3D(0, 0, 0), factor2);
+
+	raytracer.translate(plane_up, Vector3D(0, 0, 6));
+	raytracer.rotate(plane_up, 'y', 180);
+	raytracer.scale(plane_up, Point3D(0, 0, 0), factor2);
+
+	raytracer.translate(plane_front, Vector3D(-6, 0, 0));
+	raytracer.rotate(plane_front, 'y', 90);
+	raytracer.scale(plane_front, Point3D(0, 0, 0), factor2);
+
+	raytracer.translate(plane_left, Vector3D(0, 6, 0));
+	raytracer.rotate(plane_left, 'x', 90);
+	raytracer.scale(plane_left, Point3D(0, 0, 0), factor2);
+
+	raytracer.translate(plane_right, Vector3D(0, -6, 0));
+	raytracer.rotate(plane_right, 'x', -90);
+	raytracer.scale(plane_right, Point3D(0, 0, 0), factor2);
+
+	// Render the scene, feel free to make the image smaller for
+	// testing purposes.
+	// Camera parameters.
+	Vector3D up(0, 0, 1);
+	double fov = 60;
+	Point3D eye(16, 0, 0);
+	Vector3D view(-1, 0, 0);
+	std::cout << "Generating photon map..." << std::endl;
+	raytracer.generatePhotonMap(&photon_map, 1);
+	std::cout << "Generating media map..." << std::endl;
+	raytracer.generatePhotonMap(&media_map, 2);
+	std::cout << "Rendering photon map..." << std::endl;
+	raytracer.renderPhotonMap(width, height, eye, view, up, fov, "photon.bmp", &photon_map);
+	std::cout << "Rendering media map..." << std::endl;
+	raytracer.renderPhotonMap(width, height, eye, view, up, fov, "media.bmp", &media_map);
+	std::cout << "Rendering fancy image..." << std::endl;
+	raytracer.renderWithPhoton(width, height, eye, view, up, fov, "scene8_global.bmp", &media_map, &photon_map);
+	// std::cout << "Finished" << std::endl;
+	// photon_map.displayPhotoMap();
+#endif
+#ifdef SCENE14 // cornell box arbitrary mesh
+
+	MeshObject teapot_mesh("./obj/teapot.obj");
+	// MeshObject mario_mesh("./obj/bunny.obj");
+	// MeshObject bunny_mesh("./obj/mario.obj");
+	teapot_mesh.normalizeVectorCoord();
+	printf("VERTEX\n");
+	dumpvectorf(teapot_mesh.getVerts());
+	printf("FACES\n");
+	dumpvectorfaces(teapot_mesh.getFaces());
+	printf("NORMALS\n");
+	dumpvectorf(teapot_mesh.getNormals());
+	printf("TEXCOORDS\n");
+	dumpvectorf(teapot_mesh.getTexCoords());
+	printf("NUMBER OF VERTEX:%d\n", teapot_mesh.getVerts().size());
+	printf("NUMBER OF FACE:%d\n", teapot_mesh.getFaces().size());
+
+	raytracer.addLightSource(new PointLight(Point3D(0, 0, 6),
+		Colour(0.6, 0.6, 0.6)));
+	raytracer.addLightSource(new PointLight(Point3D(4, 4, 4),
+		Colour(0.4, 0.4, 0.4)));
+
+	// Add a unit square into the scene with material mat.
+	SceneDagNode* plane = raytracer.addObject(new UnitSquare(), &jade);
+	SceneDagNode* sphere = raytracer.addObject(new UnitSphere(), &gold);
+	SceneDagNode* cube = raytracer.addObject(new GeneralObject(), &gold);
+
+	raytracer.rotate(cube, 'x', -45);
+	raytracer.rotate(cube, 'y', 45);
+	raytracer.rotate(cube, 'z', 45);
+
+	cube->obj->setMesh(&teapot_mesh);
+	plane->mat->texture_ind = false;
+	cube->mat->texture_ind = false;
+	sphere->mat->texture_ind = false;
+	plane->mat->normal_ind = false;
+	cube->mat->normal_ind = false;
+	sphere->mat->normal_ind = false;
+
+	// Apply some transformations to the unit square.
+	double factor1[3] = { 1.0, 2.0, 1.0 };
+	double factor2[3] = { 12.0, 12.0, 12.0 };
+	double factor3[3] = { 3.0, 3.0, 3.0 };
+
+	raytracer.translate(sphere, Vector3D(0, 0, -5));
+	raytracer.rotate(sphere, 'x', -45);
+	raytracer.rotate(sphere, 'z', 45);
+	raytracer.scale(sphere, Point3D(0, 0, 0), factor1);
+
+	raytracer.translate(plane, Vector3D(0, 0, -7));
+	raytracer.rotate(plane, 'z', 45);
+	raytracer.scale(plane, Point3D(0, 0, 0), factor2);
+	raytracer.scale(cube, Point3D(0, 0, 0), factor3);
+
+	Vector3D up(0, 1, 0);
+	double fov = 60;
+	Point3D eye(0, 0, 12);
+	Vector3D view(0, 0, -9);
+	raytracer.render(width, height, eye, view, up, fov, "scene7_view1.bmp");
+	time(&timer2);
+	// Render it from a different point of view.
+	double seconds = difftime(timer2, timer1);
+	std::cout << "First image rendering finished. It takes " << seconds << " seconds." << std::endl;
+	timer1 = timer2;
+	Vector3D up2(0, 0, 1);
+	Point3D eye2(-5, 0, 0);
+	Vector3D view2(15, 0, 0);
+	raytracer.render(width, height, eye2, view2, up2, fov, "scene7_view2.bmp");
+	time(&timer2);
+	seconds = difftime(timer2, timer1);
+	std::cout << "Second image rendering finished. It takes " << seconds << " seconds." << std::endl;
+
+#endif
 
     return 0;
 }

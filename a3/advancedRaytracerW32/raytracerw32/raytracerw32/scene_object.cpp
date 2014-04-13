@@ -235,6 +235,7 @@ bool GeneralObject::intersect( Ray3D& ray, const Matrix4x4& worldToModel,
 	// to simplify the intersection test.
 
       Vector3D dir = worldToModel*ray.dir;
+	  // dir.normalize();
       Vector3D normal;
       Point3D origin = worldToModel*ray.origin;
       Point3D intersect;
@@ -335,6 +336,9 @@ bool GeneralObject::intersect( Ray3D& ray, const Matrix4x4& worldToModel,
           vector<Vector3f> normals = getMesh()->getNormals();
           for (unsigned int i = 0; i < faces.size(); i++)
           {
+			    // std::cout << faces[i].verts.coords[0] << std::endl;
+				// std::cout << faces[i].verts.coords[1] << std::endl;
+				// std::cout << faces[i].verts.coords[2] << std::endl;
                 p_0[0] = verts[faces[i].verts.coords[0]].coords[0];
                 p_0[1] = verts[faces[i].verts.coords[0]].coords[1];
                 p_0[2] = verts[faces[i].verts.coords[0]].coords[2];
@@ -344,9 +348,18 @@ bool GeneralObject::intersect( Ray3D& ray, const Matrix4x4& worldToModel,
                 p_2[0] = verts[faces[i].verts.coords[2]].coords[0];
                 p_2[1] = verts[faces[i].verts.coords[2]].coords[1];
                 p_2[2] = verts[faces[i].verts.coords[2]].coords[2];
-                n_face[0] = normals[faces[i].normals.coords[0]].coords[0]; 
-                n_face[1] = normals[faces[i].normals.coords[0]].coords[1]; 
-                n_face[2] = normals[faces[i].normals.coords[0]].coords[2];
+				if (normals.size() != verts.size())
+				{
+					v_10 = p_1 - p_0; v_10.normalize();
+					v_02 = p_0 - p_2; v_02.normalize();
+					n_face = -v_10.cross(v_02);
+				}
+				else
+				{
+					n_face[0] = normals[faces[i].normals.coords[0]].coords[0];
+					n_face[1] = normals[faces[i].normals.coords[0]].coords[1];
+					n_face[2] = normals[faces[i].normals.coords[0]].coords[2];
+				}
                 // std::cout<<n_face<<std::endl;
                 // std::cout<<p_0<<p_1<<p_2<<std::endl;
                 n_face.normalize();
@@ -359,7 +372,7 @@ bool GeneralObject::intersect( Ray3D& ray, const Matrix4x4& worldToModel,
                 v_21 = p_2 - p_1;
                 if ((n_face.dot(v_10.cross(p_x - p_0))>-EPSILON) && (n_face.dot(v_21.cross(p_x - p_1))>-EPSILON) && (n_face.dot(v_02.cross(p_x - p_2))>-EPSILON))
                 {
-                      std::cout<<t_triangle<<std::endl;
+                      // std::cout<<t_triangle<<std::endl;
                       t_min = t_triangle;
                       n_min = n_face;
                 }

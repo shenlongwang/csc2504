@@ -1,13 +1,22 @@
-﻿Build started 2014-04-12 2:07:37 AM.
+﻿Build started 2014-04-13 12:56:32 AM.
      1>Project "C:\Users\Shenlong Wang\Documents\GitHub\csc2504\a3\advancedRaytracerW32\raytracerw32\raytracerw32\raytracerw32.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /sdl /O2 /Oi /Oy- /GL /D WIN32 /D NDEBUG /D _CONSOLE /D _LIB /D _CONSOLE /D _LIB /D _CRT_SECURE_NO_WARNINGS /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt raytracer.cpp
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /Zi /nologo /W3 /WX- /sdl /O2 /Oi /Oy- /GL /D WIN32 /D NDEBUG /D _CONSOLE /D _LIB /D _CONSOLE /D _LIB /D _CRT_SECURE_NO_WARNINGS /D _UNICODE /D UNICODE /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Release\\" /Fd"Release\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt meshObject.cpp raytracer.cpp
+         meshObject.cpp
+     1>meshObject.cpp(146): warning C4018: '<' : signed/unsigned mismatch
+     1>meshObject.cpp(142): warning C4101: 'a' : unreferenced local variable
+     1>meshObject.cpp(142): warning C4101: 'b' : unreferenced local variable
+     1>meshObject.cpp(142): warning C4101: 'd' : unreferenced local variable
+     1>meshObject.cpp(142): warning C4101: 'c' : unreferenced local variable
+     1>meshObject.cpp(196): warning C4018: '<' : signed/unsigned mismatch
+     1>meshObject.cpp(203): warning C4018: '<' : signed/unsigned mismatch
+     1>meshObject.cpp(205): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>meshObject.cpp(206): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
+     1>meshObject.cpp(207): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
          raytracer.cpp
      1>c:\users\shenlong wang\documents\github\csc2504\a3\advancedraytracerw32\raytracerw32\raytracerw32\photon.h(36): warning C4018: '<' : signed/unsigned mismatch
-     1>raytracer.cpp(370): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
-     1>raytracer.cpp(402): warning C4804: '%' : unsafe use of type 'bool' in operation
-     1>raytracer.cpp(966): warning C4018: '<' : signed/unsigned mismatch
-     1>raytracer.cpp(1122): warning C4101: 'timer2' : unreferenced local variable
+     1>raytracer.cpp(382): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
+     1>raytracer.cpp(1008): warning C4018: '<' : signed/unsigned mismatch
        Link:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Shenlong Wang\Documents\GitHub\csc2504\a3\advancedRaytracerW32\raytracerw32\Release\raytracerw32.exe" /INCREMENTAL:NO /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Shenlong Wang\Documents\GitHub\csc2504\a3\advancedRaytracerW32\raytracerw32\Release\raytracerw32.pdb" /SUBSYSTEM:CONSOLE /OPT:REF /OPT:ICF /LTCG /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Shenlong Wang\Documents\GitHub\csc2504\a3\advancedRaytracerW32\raytracerw32\Release\raytracerw32.lib" /MACHINE:X86 /SAFESEH Release\bmp_io.obj
          Release\light_source.obj
@@ -17,11 +26,10 @@
          Release\scene_object.obj
          Release\util.obj
          Generating code
-     1>c:\users\shenlong wang\documents\github\csc2504\a3\advancedraytracerw32\raytracerw32\raytracerw32\photon.h(36): warning C4715: 'PhotonMap::getPhoton' : not all control paths return a value
          Finished generating code
          raytracerw32.vcxproj -> C:\Users\Shenlong Wang\Documents\GitHub\csc2504\a3\advancedRaytracerW32\raytracerw32\Release\raytracerw32.exe
      1>Done Building Project "C:\Users\Shenlong Wang\Documents\GitHub\csc2504\a3\advancedRaytracerW32\raytracerw32\raytracerw32\raytracerw32.vcxproj" (Build target(s)).
 
 Build succeeded.
 
-Time Elapsed 00:00:01.43
+Time Elapsed 00:00:01.51
