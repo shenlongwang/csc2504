@@ -671,8 +671,17 @@ bool UnitTextureSquare::intersect( Ray3D& ray, const Matrix4x4& worldToModel,
       Vector3D v_n(0.0, 0.0, 1.0);
       v_n.normalize();
       ray.intersection.point = modelToWorld * p_i;
-      ray.intersection.uv[0] = p_i[0] - 0.5;
-      ray.intersection.uv[1] = p_i[1] - 0.5;
+      ray.intersection.uv[0] = p_i[0] + 0.5;
+      ray.intersection.uv[1] = p_i[1] + 0.5;
+	  // std::cout << ray.intersection.uv[0] << ", " << ray.intersection.uv[1] << std::endl;
+	  if (ray.intersection.mat->normal_ind)
+	  {
+		  Colour n_load = ray.intersection.mat->normalmap->getColor(ray.intersection.uv);
+		  v_n[0] = n_load[0];
+		  v_n[1] = n_load[1];
+		  v_n[2] = n_load[2];
+		  v_n.normalize();
+	  }
       // ray.intersection.normal = transNorm(modelToWorld, v_n); 
       ray.intersection.normal = transNorm(worldToModel, v_n); 
       ray.intersection.normal.normalize(); 

@@ -129,3 +129,193 @@ Colour PhotonMap::findKNNMedia(Point3D eye, Vector3D ray, int num)
 	return mean_color;
 
 }
+
+
+inline double PhotonMap::dist(KDNode *a, Point3D b, int dim)
+{
+	// Calculate the distance between two Nodes;
+	double t, d = 0;
+	while (dim--)
+	{
+		t = photon_map[a->index].pos[dim] - b[dim];
+		d += t * t;
+	}
+	return d;
+}
+
+inline void PhotonMap::swap(KDNode *a, KDNode *b)
+{
+	// Swap the data of the two nodes;
+	int temp;
+	temp = a->index;
+	a->index = b->index;
+	b->index = temp;
+}
+
+void PhotonMap::printKDNode(KDNode *root, int depth)
+{
+	std::cout << depth << "th Degree Nodes:" << std::endl;
+	std::cout << "(" << photon_map[root->index].pos[0] << ", " << photon_map[root->index].pos[1] << ", " << photon_map[root->index].pos[2] << ")" << std::endl;
+	if (depth < 0)
+		return;
+	if (root->left != NULL)
+		printKDNode(root->left, depth + 1);
+	if (root->right != NULL)
+		printKDNode(root->right, depth + 1);
+}
+
+KDNode* PhotonMap::FindMedian(KDNode *startNode, KDNode *endNode, int ind)
+{
+	// Find the median of a set of nodes, sorted according to INDth value. 
+	if (endNode <= startNode) return NULL;
+	if (endNode == startNode + 1) return startNode;
+	KDNode *iterateNode, *storeNode, *medianNode = startNode + (endNode - startNode) / 2;
+	double pivot;
+	while (true)
+	{
+		pivot = photon_map[medianNode->index].pos[ind];
+		swap(medianNode, endNode - 1);
+		storeNode = startNode;
+		// Put all the nodes smaller than the median before median
+		for (iterateNode = startNode; iterateNode < endNode; iterateNode++)
+		{
+			if (photon_map[iterateNode->index].pos[ind] < pivot)
+			{
+				if (iterateNode != storeNode)
+					swap(iterateNode, storeNode);
+				storeNode++;
+			}
+		}
+		swap(storeNode, endNode - 1);
+
+		if (photon_map[storeNode->index].pos[ind] == photon_map[medianNode->index].pos[ind])
+			return medianNode;
+
+		if (storeNode > medianNode)
+			endNode = storeNode;
+		else
+			startNode = storeNode;
+	}
+}
+
+KDNode* PhotonMap::MakeKDTree(KDNode *treeNode, int nodeSize, int ind, int dim)
+{
+	KDNode *node;
+	if (!nodeSize) return NULL;
+	if ((node = FindMedian(treeNode, treeNode + nodeSize, ind)))
+	{
+		ind = (ind + 1) % dim; // Update index
+		node->left = MakeKDTree(treeNode, node - treeNode, ind, dim);
+		node->right = MakeKDTree(node + 1, treeNode + nodeSize - (node + 1), ind, dim);
+	}
+	return node;
+}
+
+void PhotonMap::initKDtree(int k)
+{
+	int num_pts = photon_map.size();
+	tree_mem = new KDNode[num_pts];
+	for (size_t i = 0; i < num_pts; i++)
+	{
+		tree_mem[i].index = i;
+	}
+	std::cout << "Num of Points" << num_pts << std::endl;
+	std::cout << "Making KDtree Now...." << std::endl;
+	tree_root = MakeKDTree(tree_mem, num_pts, 0, 3);
+	bestDist = new double[k];
+	bestNodes = new KDNode*[k];
+	for (size_t i = 0; i < k; i++)
+	{
+		KDNode temp_pts;
+		temp_pts.index = 0;
+		bestNodes[i] = &temp_pts;
+		bestDist[i] = 1e6;
+	}
+}
+
+
+inline void PhotonMap::pushNodes(KDNode **resultTree, double *dist, int dim)
+{
+	double temp;
+	KDNode* tempNode;
+	for (size_t i = dim - 1; i > 0; i--)
+	{
+		if (!resultTree[i - 1] || dist[i] < dist[i - 1])
+		{
+			tempNode = resultTree[i - 1];
+			resultTree[i - 1] = resultTree[i];
+			resultTree[i] = tempNode;
+			temp = dist[i - 1];
+			dist[i - 1] = dist[i];
+			dist[i] = temp;
+		}
+		else
+			return;
+	}
+}
+
+void PhotonMap::FindKNearest(KDNode *rootNode, Point3D queryNode, int ind,
+	int dim, int k, KDNode **bestNodes, double *bestDist)
+{
+	double distRoot, distRootInd, distSqRootInd;
+	if (!rootNode) return;
+	distRoot = dist(rootNode, queryNode, dim);
+	distRootInd = photon_map[rootNode->index].pos[ind] - queryNode[ind];
+	distSqRootInd = distRootInd * distRootInd;
+
+	if (!bestNodes[k - 1] || distRoot < bestDist[k - 1])
+	{
+		bestNodes[k - 1] = rootNode;
+		bestDist[k - 1] = distRoot;
+		pushNodes(bestNodes, bestDist, k);
+	}
+
+	if (!bestDist[k - 1]) return; // Root is exact equal to query
+
+	if (ind++ >= dim) ind = 0; // Recursively change index
+
+	FindKNearest(distRootInd > 0 ? rootNode->left : rootNode->right,
+		queryNode, ind, dim, k, bestNodes, bestDist);
+	if (distSqRootInd >= bestDist[k - 1]) return; // No need to search other parts
+	FindKNearest(distRootInd > 0 ? rootNode->right : rootNode->left,
+		queryNode, ind, dim, k, bestNodes, bestDist);
+
+}
+
+
+
+Colour PhotonMap::findKNNColorWithKDTree(Point3D point, int num)
+{ // find knn
+
+	// printKDNode(tree_root, 4);
+	for (size_t i = 0; i < num; i++)
+		bestDist[i] = 1e6;
+	FindKNearest(tree_root, point, 0, 3, num, bestNodes, bestDist);
+	
+	 // print the nearest neighbours
+	// std::cout << "Query Point is" << std::endl;
+	// std::cout << point << std::endl;
+	// std::cout << "K Nearest Neighbour is" << std::endl;
+	//for (size_t i = 0; i < num; i++)
+	//{
+	//	std::cout << photon_map[bestNodes[i]->index].pos << std::endl;
+	//	std::cout << bestDist[i] << std::endl;
+	//}
+
+	size_t photon_index;
+	Colour mean_color;
+	double weight = 0;
+	double weight_sum = 0;
+	double knn_radius = sqrt(bestDist[num - 1]);
+	for (int i = 0; i < num; i++)
+	{
+		photon_index = bestNodes[i]->index;
+		weight = 1 - bestDist[i] / (pow(knn_radius, 2) + DBL_EPSILON);
+		mean_color = mean_color + weight * photon_map[photon_index].power;
+		weight_sum = weight_sum + weight;
+	}
+	mean_color = (1 / (knn_radius*knn_radius + 0.05)) * mean_color;
+	// std::cout << mean_color << std::endl;
+	return mean_color;
+
+}

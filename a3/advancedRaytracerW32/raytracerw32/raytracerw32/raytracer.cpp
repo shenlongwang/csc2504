@@ -42,14 +42,15 @@
 // #define SCENE4
 // #define SCENE5
 // #define SCENE6
-#define SCENE7 // Arbitrary Mesh
+// #define SCENE7 // Arbitrary Mesh
 // #define SCENE8 // Photon map
-// #define SCENE9 // Caustics
+#define SCENE9 // Caustics
 // #define SCENE10 // Fog
 // #define SCENE11 // Caustics + Fog
 // #define SCENE12 // Caustics + Fog + Texture
 // #define SCENE13 // Caustics Water
 
+// #define SCENE15 // KDTree
 
 //---------------------------------------------------------------------------------
 
@@ -88,9 +89,13 @@
 #define REFRACTION 
 //---------------------------------------------------------------------------------
 
-// define whether use participating media
-#define PARTICIPATING
+
+//---------------------------------------------------------------------------------
+// Photon Mapping related
+// #define PARTICIPATING
 #define PHOTON 
+#define KDTREE
+
 
 using std::vector;
 
@@ -322,9 +327,15 @@ void Raytracer::traverseScene( SceneDagNode* node, Ray3D& ray ) {
 	_modelToWorld = _modelToWorld*node->trans;
 	_worldToModel = node->invtrans*_worldToModel; 
 	if (node->obj) {
-		// Perform intersection.
+		// Perform
+		Material* temp = ray.intersection.mat;
+		ray.intersection.mat = node->mat;
 		if (node->obj->intersect(ray, _worldToModel, _modelToWorld)) {
 			ray.intersection.mat = node->mat;
+		}
+		else
+		{
+			ray.intersection.mat = temp;
 		}
 	}
 	// Traverse the children.
@@ -363,10 +374,10 @@ void Raytracer::generatePhotonMap(PhotonMap* photon_map, int map_type) {
 	    photon_num_unit = 30000;
     else
 	    photon_num_unit = 60000;
-    Point3D origin(16.0, 0.0, 0.0);
 #else
 	int photon_num_unit = 120000;
 #endif
+	Point3D origin(16.0, 0.0, 0.0);
 	int photon_num = 0;
 	int photon_counter = 0;
 	Ray3D photon_ray;
@@ -399,6 +410,7 @@ void Raytracer::generatePhotonMap(PhotonMap* photon_map, int map_type) {
 			tracePhoton(&photon_temp, 4);
 			if ((photon_temp.type == ABSORPTION)||(photon_temp.type == DIFFUSE) || (photon_temp.type == VOLUME))
 			{
+#ifdef PARTICIPATING
                 if (map_type == 2)
                 {
                     if (photon_temp.type == VOLUME)
@@ -418,21 +430,26 @@ void Raytracer::generatePhotonMap(PhotonMap* photon_map, int map_type) {
                         }
                     }
                 }
+#endif
                 if (map_type == 1)
                 {
                     // Specular and diffuse
                     // if ((photon_temp.specular_history != 0) || (photon_temp.diffuse_history != 0))
                     // Only specular
-                    // if ((photon_temp.specular_history != 0))
+                    if ((photon_temp.specular_history != 0))
                     // Only diffuse
                     // if ((photon_temp.diffuse_history != 0))
                     // Only volume
-				    if ((photon_temp.specular_history != 0) || (photon_temp.diffuse_history != 0))
+				    // if ((photon_temp.specular_history != 0) || (photon_temp.diffuse_history != 0))
                     {
+						photon_ray.dir = origin - photon_temp.pos;
+						photon_ray.dir.normalize();
+						photon_ray.origin = photon_temp.pos + 0.00001 * eye_ray.dir;
+						photon_ray.intersection.none = true;
                         traverseScene(_root, photon_ray);
                         if (!photon_ray.intersection.none && photon_ray.intersection.t_value > 0.0)
                         {
-                        	photon_map->addNewPhoton(photon_ray.intersection.point, photon_ray.intersection.mat->diffuse, photon_ray.dir, 0);
+							photon_map->addNewPhoton(photon_temp.pos, photon_temp.power, photon_temp.dir, 0);
                         	photon_counter++;
                             if (photon_counter%100 == 0)
                                 std::cout<<photon_counter<<std::endl;
@@ -485,7 +502,7 @@ void Raytracer::computeShading( Ray3D& ray ) {
 				// to avoid intersection after the light
 				t_light = sqrt(t_light / (rayLight.dir.dot(rayLight.dir)));
                 traverseScene(_root, rayLight);
-				if (!rayLight.intersection.none && rayLight.intersection.t_value > 0.0 && rayLight.intersection.t_value < t_light)
+				if (!rayLight.intersection.none && rayLight.intersection.t_value > 0.0 && rayLight.intersection.t_value < t_light && rayLight.intersection.mat->refract < 0.5) //  
                 {
                     curLight->light->shade(ray, SHADOW);
         	    }
@@ -735,7 +752,7 @@ void Raytracer::tracePhoton(Photon* photon, int depth)
 #ifdef SCENE11
 		double toss = (double)rand() / (RAND_MAX) * 30.0 + 5;
 #else
-		double toss = (double)rand() / (RAND_MAX) * 15.0;
+		double toss = (double)rand() / (RAND_MAX) * 12.0;
 #endif
 		denominator = fmax(fmax(photon->power[0], photon->power[1]), photon->power[2]) + DBL_EPSILON;
 		// the probability of diffuse reflection
@@ -746,7 +763,7 @@ void Raytracer::tracePhoton(Photon* photon, int depth)
 		col_specular = (photon_ray.intersection.mat->specular * photon->power);
 		numerator = fmax(fmax(col_specular[0], col_specular[1]), col_specular[2]);
 		p_specular = numerator / denominator;
-		if ((p_specular < 0.2) && (photon_ray.intersection.t_value > toss)) // exponetial distribution
+		if ((p_specular < 0.01) && (photon_ray.intersection.t_value > toss)) // exponetial distribution
 		{
 			double toss2 = (double)rand() / (RAND_MAX);
 #ifdef SCENE11			
@@ -759,6 +776,12 @@ void Raytracer::tracePhoton(Photon* photon, int depth)
 				photon->power = Colour(0.9, 0.7, 0.5);
 				photon->power.clamp();
 				photon->type = VOLUME;
+				return;
+			}
+			else
+			{
+				photon->type = OFF;
+				return;
 			}
 		}
 // #ifdef SCENE11			
@@ -824,7 +847,10 @@ void Raytracer::tracePhoton(Photon* photon, int depth)
 			}
 			else
 			{
-				if (photon_ray.intersection.mat->refract <= photon_ray.intersection.mat->reflect)
+				double reflect_rand = (double)rand() / (RAND_MAX);
+				double p_reflect = (photon_ray.intersection.mat->reflect) / ((photon_ray.intersection.mat->refract + photon_ray.intersection.mat->reflect) + DBL_EPSILON);
+
+				if (reflect_rand <= p_reflect)
 				{	// reflection
 					reflect_v = photon_ray.intersection.point - photon_ray.origin;
 					reflect_v.normalize();
@@ -873,7 +899,7 @@ void Raytracer::tracePhoton(Photon* photon, int depth)
 
 
 		}
-		else if(depth < 4) // To make sure direct photon cannot be absorbed.
+		else if (depth < 4 && p_specular < 0.01) // To make sure direct photon cannot be absorbed.
 		{
 			photon->pos = photon_ray.intersection.point;
 			photon->dir = photon_ray.intersection.normal;
@@ -1044,9 +1070,13 @@ void Raytracer::renderWithPhoton(int width, int height, Point3D eye, Vector3D vi
 	viewToWorld = initInvViewMatrix(eye, view, up);
 #ifdef PARTICIPATING	
 	int knn_num = 20;
-	int knn_num2 = 100;
 #else
+	int knn_num2 = 200;
 	int knn_num = 100;
+#endif
+
+#ifdef KDTREE
+	photon_map->initKDtree(knn_num2);
 #endif
 	double knn_radius = 1;
 	Colour photon_col;
@@ -1113,8 +1143,14 @@ void Raytracer::renderWithPhoton(int width, int height, Point3D eye, Vector3D vi
 				traverseScene(_root, ray);
 				if (!ray.intersection.none && (ray.intersection.mat->reflect == 0) && (ray.intersection.mat->refract == 0))
 				{
+#ifdef KDTREE
+					std::cout << ray.intersection.point << std::endl;
+					photon_col = (1 / 1200.0) * photon_map->findKNNColorWithKDTree(ray.intersection.point, knn_num2);
+					// Colour photon_col2 = (1 / 1200.0) * photon_map->findKNN(ray.intersection.point, knn_num2);
+					// std::cout<<photon_col<<", "<<photon_col2<<::std::endl;
+#else
 					photon_col = (1 / 1200.0) * photon_map->findKNN(ray.intersection.point, knn_num2);
-					// std::cout << photon_col << std::endl;
+#endif
 					photon_col.clamp();
 					col = col + anti_weight*photon_col;
 					col.clamp();
@@ -1150,8 +1186,8 @@ int main(int argc, char* argv[])
 	// int height = 1080; 
 #endif
 #ifdef SMALL_CUBE
-	width = 30;
-	height = 30;
+	width = 100;
+	height = 100;
 #endif
 #ifdef LARGE_CUBE
 	width = 1024;
@@ -2017,16 +2053,43 @@ int main(int argc, char* argv[])
 		Colour(0.8, 0.8, 0.8),
 		52.8, 1.0, 0.0, 1.8);
 	cornell_glossy.glossy_ind = true;
+	Material cornell_water(Colour(0.0, 0.0, 0.0), Colour(0.0, 0.0, 0.0),
+		Colour(1.0, 1.0, 1.0),
+		52.8, 0.3, 0.7, 1.33);
+	Material cornell_grass(Colour(0.0, 0.0, 0.0), Colour(0.9, 0.9, 0.9),
+		Colour(0.0, 0.0, 0.0),
+		12.8, 0.0, 0.0, 0.0);
+	// plane_water->mat->normalmap = &waternormal;
+	// plane_water->mat->normal_ind = true;
+	Texture waternormal;
+	waternormal.readImage("./Textures/wavemap.bmp");
+	cornell_water.normal_ind = true;
+	cornell_water.normalmap = &waternormal;
+
+	Texture grass;
+	grass.readImage("./Textures/grass.bmp");
+	Texture grassnormal;
+	grassnormal.readImage("./Textures/grassnormal.bmp");
+	cornell_grass.texture_ind = true;
+	cornell_grass.texture = &grass;
+	cornell_grass.normal_ind = true;
+	cornell_grass.normalmap = &grassnormal;
+
+
 	// Add a unit square into the scene with material mat.
 	SceneDagNode* plane_right = raytracer.addObject(new UnitSquare(), &cornell_red);
 	SceneDagNode* plane_up = raytracer.addObject(new UnitSquare(), &cornell_gray);
 	SceneDagNode* plane_left = raytracer.addObject(new UnitSquare(), &cornell_blue);
-	SceneDagNode* plane_down = raytracer.addObject(new UnitSquare(), &cornell_gray);
+	SceneDagNode* plane_down = raytracer.addObject(new UnitTextureSquare(), &cornell_grass);
 	SceneDagNode* plane_front = raytracer.addObject(new UnitSquare(), &cornell_gray);
 
 	SceneDagNode* sphere_mirror = raytracer.addObject(new UnitSphere(), &cornell_mirror);
 	SceneDagNode* sphere_glossy = raytracer.addObject(new UnitSphere(), &cornell_glass);
 	SceneDagNode* cube = raytracer.addObject(new UnitCube(), &cornell_mirror);
+	SceneDagNode* plane_water = raytracer.addObject(new UnitTextureSquare(), &cornell_water);
+
+
+
 
 	// Apply some transformations to the unit square.
 	double factor1[3] = { 2.0, 2.0, 2.0 };
@@ -2068,23 +2131,43 @@ int main(int argc, char* argv[])
 	raytracer.rotate(plane_right, 'x', -90);
 	raytracer.scale(plane_right, Point3D(0, 0, 0), factor2);
 
+	raytracer.translate(plane_water, Vector3D(0, 0, -4));
+	raytracer.scale(plane_water, Point3D(0, 0, 0), factor2);
+
 	// Render the scene, feel free to make the image smaller for
 	// testing purposes.
 	// Camera parameters.
 	Vector3D up(0, 0, 1);
 	double fov = 60;
-	Point3D eye(16, 0, 0);
+	Point3D eye(18, 0, 0);
 	Vector3D view(-1, 0, 0);
 	std::cout << "Generating photon map..." << std::endl;
-	raytracer.generatePhotonMap(&photon_map);
+	raytracer.generatePhotonMap(&photon_map, 1);
 	std::cout << "Rendering photon map..." << std::endl;
 	raytracer.renderPhotonMap(width, height, eye, view, up, fov, "photon.bmp", &photon_map);
 	std::cout << "Rendering fancy image..." << std::endl;
-	raytracer.renderWithPhoton(width, height, eye, view, up, fov, "scene8_global.bmp", &photon_map);
+	//Colour col_test;
+	//double start_time = time(NULL);
+	//// photon_map.initKDtree(100);
+	//for (size_t i = 0; i < 1000;i++)
+	//	col_test = photon_map.findKNNColorWithKDTree(Point3D(-4, -5.0, 6), 200);
+	//double end_time = time(NULL);
+	//double seconds = end_time - start_time;
+	//std::cout << start_time << ", " << end_time << std::endl;
+	//std::cout << col_test << std::endl;
+	//std::cout << "KNN with KDtree: " << seconds << " seconds." << std::endl;
+	//start_time = time(NULL);
+	//// Render it from a different point of view.
+	//for (size_t i = 0; i < 1000; i++)
+	//	col_test = photon_map.findKNN(Point3D(-4, -5.0, 6), 200);
+	//end_time = time(NULL);
+	//seconds = end_time - start_time;
+	//std::cout << col_test << std::endl;
+	//std::cout << "KNN without KDtree: " << seconds << " seconds." << std::endl;
+	raytracer.renderWithPhoton(width, height, eye, view, up, fov, "scene8_water.bmp", &photon_map, &photon_map);
 	std::cout << "Finished" << std::endl;
 	// photon_map.displayPhotoMap();
 #endif
-
 
 #ifdef SCENE11 // Cornell box with participating media(fog)
 	PhotonMap photon_map;
@@ -2473,6 +2556,10 @@ int main(int argc, char* argv[])
 	time(&timer2);
 	seconds = difftime(timer2, timer1);
 	std::cout << "Second image rendering finished. It takes " << seconds << " seconds." << std::endl;
+
+#endif
+
+#ifdef SCENE15
 
 #endif
 

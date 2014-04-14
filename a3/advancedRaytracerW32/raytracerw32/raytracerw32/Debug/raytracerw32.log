@@ -1,56 +1,13 @@
-﻿Build started 2014-04-13 12:32:51 AM.
+﻿Build started 2014-04-14 12:03:29 PM.
      1>Project "C:\Users\Shenlong Wang\Documents\GitHub\csc2504\a3\advancedRaytracerW32\raytracerw32\raytracerw32\raytracerw32.vcxproj" on node 2 (Build target(s)).
      1>ClCompile:
-         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _LIB /D _CRT_SECURE_NO_WARNINGS /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt meshObject.cpp raytracer.cpp scene_object.cpp
-         scene_object.cpp
-     1>c:\users\shenlong wang\documents\github\csc2504\a3\advancedraytracerw32\raytracerw32\raytracerw32\scene_object.cpp(33): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\shenlong wang\documents\github\csc2504\a3\advancedraytracerw32\raytracerw32\raytracerw32\scene_object.cpp(78): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\shenlong wang\documents\github\csc2504\a3\advancedraytracerw32\raytracerw32\raytracerw32\scene_object.cpp(79): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\shenlong wang\documents\github\csc2504\a3\advancedraytracerw32\raytracerw32\raytracerw32\scene_object.cpp(80): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\shenlong wang\documents\github\csc2504\a3\advancedraytracerw32\raytracerw32\raytracerw32\scene_object.cpp(142): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\shenlong wang\documents\github\csc2504\a3\advancedraytracerw32\raytracerw32\raytracerw32\scene_object.cpp(143): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\shenlong wang\documents\github\csc2504\a3\advancedraytracerw32\raytracerw32\raytracerw32\scene_object.cpp(144): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\shenlong wang\documents\github\csc2504\a3\advancedraytracerw32\raytracerw32\raytracerw32\scene_object.cpp(188): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\shenlong wang\documents\github\csc2504\a3\advancedraytracerw32\raytracerw32\raytracerw32\scene_object.cpp(246): warning C4305: 'initializing' : truncation from 'double' to 'float'
-     1>c:\users\shenlong wang\documents\github\csc2504\a3\advancedraytracerw32\raytracerw32\raytracerw32\scene_object.cpp(250): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\shenlong wang\documents\github\csc2504\a3\advancedraytracerw32\raytracerw32\raytracerw32\scene_object.cpp(252): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\shenlong wang\documents\github\csc2504\a3\advancedraytracerw32\raytracerw32\raytracerw32\scene_object.cpp(263): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\shenlong wang\documents\github\csc2504\a3\advancedraytracerw32\raytracerw32\raytracerw32\scene_object.cpp(274): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\shenlong wang\documents\github\csc2504\a3\advancedraytracerw32\raytracerw32\raytracerw32\scene_object.cpp(285): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\shenlong wang\documents\github\csc2504\a3\advancedraytracerw32\raytracerw32\raytracerw32\scene_object.cpp(296): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\shenlong wang\documents\github\csc2504\a3\advancedraytracerw32\raytracerw32\raytracerw32\scene_object.cpp(307): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\shenlong wang\documents\github\csc2504\a3\advancedraytracerw32\raytracerw32\raytracerw32\scene_object.cpp(421): warning C4305: 'initializing' : truncation from 'double' to 'float'
-     1>c:\users\shenlong wang\documents\github\csc2504\a3\advancedraytracerw32\raytracerw32\raytracerw32\scene_object.cpp(425): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\shenlong wang\documents\github\csc2504\a3\advancedraytracerw32\raytracerw32\raytracerw32\scene_object.cpp(427): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\shenlong wang\documents\github\csc2504\a3\advancedraytracerw32\raytracerw32\raytracerw32\scene_object.cpp(438): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\shenlong wang\documents\github\csc2504\a3\advancedraytracerw32\raytracerw32\raytracerw32\scene_object.cpp(449): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\shenlong wang\documents\github\csc2504\a3\advancedraytracerw32\raytracerw32\raytracerw32\scene_object.cpp(460): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\shenlong wang\documents\github\csc2504\a3\advancedraytracerw32\raytracerw32\raytracerw32\scene_object.cpp(471): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\shenlong wang\documents\github\csc2504\a3\advancedraytracerw32\raytracerw32\raytracerw32\scene_object.cpp(482): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\shenlong wang\documents\github\csc2504\a3\advancedraytracerw32\raytracerw32\raytracerw32\scene_object.cpp(528): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\shenlong wang\documents\github\csc2504\a3\advancedraytracerw32\raytracerw32\raytracerw32\scene_object.cpp(529): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\shenlong wang\documents\github\csc2504\a3\advancedraytracerw32\raytracerw32\raytracerw32\scene_object.cpp(530): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\shenlong wang\documents\github\csc2504\a3\advancedraytracerw32\raytracerw32\raytracerw32\scene_object.cpp(589): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\shenlong wang\documents\github\csc2504\a3\advancedraytracerw32\raytracerw32\raytracerw32\scene_object.cpp(651): warning C4244: 'initializing' : conversion from 'double' to 'float', possible loss of data
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /sdl /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _LIB /D _CRT_SECURE_NO_WARNINGS /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt raytracer.cpp
          raytracer.cpp
-     1>c:\users\shenlong wang\documents\github\csc2504\a3\advancedraytracerw32\raytracerw32\raytracerw32\photon.h(36): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\shenlong wang\documents\github\csc2504\a3\advancedraytracerw32\raytracerw32\raytracerw32\raytracer.cpp(382): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
-     1>c:\users\shenlong wang\documents\github\csc2504\a3\advancedraytracerw32\raytracerw32\raytracerw32\raytracer.cpp(1008): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\shenlong wang\documents\github\csc2504\a3\advancedraytracerw32\raytracerw32\raytracerw32\raytracer.cpp(1824): warning C4005: 'DEPTH' : macro redefinition
-                 c:\users\shenlong wang\documents\github\csc2504\a3\advancedraytracerw32\raytracerw32\raytracerw32\raytracer.cpp(33) : see previous definition of 'DEPTH'
-         meshObject.cpp
-     1>c:\users\shenlong wang\documents\github\csc2504\a3\advancedraytracerw32\raytracerw32\raytracerw32\meshobject.cpp(146): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\shenlong wang\documents\github\csc2504\a3\advancedraytracerw32\raytracerw32\raytracerw32\meshobject.cpp(142): warning C4101: 'a' : unreferenced local variable
-     1>c:\users\shenlong wang\documents\github\csc2504\a3\advancedraytracerw32\raytracerw32\raytracerw32\meshobject.cpp(142): warning C4101: 'b' : unreferenced local variable
-     1>c:\users\shenlong wang\documents\github\csc2504\a3\advancedraytracerw32\raytracerw32\raytracerw32\meshobject.cpp(142): warning C4101: 'd' : unreferenced local variable
-     1>c:\users\shenlong wang\documents\github\csc2504\a3\advancedraytracerw32\raytracerw32\raytracerw32\meshobject.cpp(142): warning C4101: 'c' : unreferenced local variable
-     1>c:\users\shenlong wang\documents\github\csc2504\a3\advancedraytracerw32\raytracerw32\raytracerw32\meshobject.cpp(196): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\shenlong wang\documents\github\csc2504\a3\advancedraytracerw32\raytracerw32\raytracerw32\meshobject.cpp(203): warning C4018: '<' : signed/unsigned mismatch
-     1>c:\users\shenlong wang\documents\github\csc2504\a3\advancedraytracerw32\raytracerw32\raytracerw32\meshobject.cpp(205): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\shenlong wang\documents\github\csc2504\a3\advancedraytracerw32\raytracerw32\raytracerw32\meshobject.cpp(206): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-     1>c:\users\shenlong wang\documents\github\csc2504\a3\advancedraytracerw32\raytracerw32\raytracerw32\meshobject.cpp(207): warning C4244: '=' : conversion from 'double' to 'float', possible loss of data
-         Generating Code...
-     1>c:\users\shenlong wang\documents\github\csc2504\a3\advancedraytracerw32\raytracerw32\raytracerw32\photon.h(36): warning C4715: 'PhotonMap::getPhoton' : not all control paths return a value
+     1>c:\users\shenlong wang\documents\github\csc2504\a3\advancedraytracerw32\raytracerw32\raytracerw32\photon.h(41): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\shenlong wang\documents\github\csc2504\a3\advancedraytracerw32\raytracerw32\raytracerw32\raytracer.cpp(393): warning C4244: '=' : conversion from 'double' to 'int', possible loss of data
+     1>c:\users\shenlong wang\documents\github\csc2504\a3\advancedraytracerw32\raytracerw32\raytracerw32\raytracer.cpp(1034): warning C4018: '<' : signed/unsigned mismatch
+     1>c:\users\shenlong wang\documents\github\csc2504\a3\advancedraytracerw32\raytracerw32\raytracerw32\raytracer.cpp(1202): warning C4101: 'timer2' : unreferenced local variable
+     1>c:\users\shenlong wang\documents\github\csc2504\a3\advancedraytracerw32\raytracerw32\raytracerw32\photon.h(41): warning C4715: 'PhotonMap::getPhoton' : not all control paths return a value
        Link:
          C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\link.exe /ERRORREPORT:PROMPT /OUT:"C:\Users\Shenlong Wang\Documents\GitHub\csc2504\a3\advancedRaytracerW32\raytracerw32\Debug\raytracerw32.exe" /INCREMENTAL /NOLOGO kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='asInvoker' uiAccess='false'" /manifest:embed /DEBUG /PDB:"C:\Users\Shenlong Wang\Documents\GitHub\csc2504\a3\advancedRaytracerW32\raytracerw32\Debug\raytracerw32.pdb" /SUBSYSTEM:CONSOLE /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"C:\Users\Shenlong Wang\Documents\GitHub\csc2504\a3\advancedRaytracerW32\raytracerw32\Debug\raytracerw32.lib" /MACHINE:X86 Debug\bmp_io.obj
          Debug\light_source.obj
@@ -64,4 +21,4 @@
 
 Build succeeded.
 
-Time Elapsed 00:00:01.58
+Time Elapsed 00:00:00.68
