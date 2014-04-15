@@ -37,14 +37,14 @@
 // define the scene to render, please only enable one each time.
 
 // #define SCENE1 // Mirror box
-// #define SCENE2
-// #define SCENE3
-// #define SCENE4
-// #define SCENE5
+// #define SCENE2 // Depth of Field
+// #define SCENE3 // Solar System
+// #define SCENE4  // Earth
+#define SCENE5 // Environment Map 
 // #define SCENE6
 // #define SCENE7 // Arbitrary Mesh
 // #define SCENE8 // Photon map
-#define SCENE9 // Caustics
+// #define SCENE9 // Caustics Water
 // #define SCENE10 // Fog
 // #define SCENE11 // Caustics + Fog
 // #define SCENE12 // Caustics + Fog + Texture
@@ -55,14 +55,14 @@
 //---------------------------------------------------------------------------------
 
 // define the resolution.
-// #define SMALL
+#define SMALL
 // #define SMALL_CUBE
-#define LARGE_CUBE
+// #define LARGE_CUBE
 
 //---------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------
 // define whether environment mapping is used. If no, disable that.
-// #define ENVIR
+#define ENVIR
 //---------------------------------------------------------------------------------
 //---------------------------------------------------------------------------------
 // define whether depth of field effects is on.
@@ -1071,7 +1071,7 @@ void Raytracer::renderWithPhoton(int width, int height, Point3D eye, Vector3D vi
 #ifdef PARTICIPATING	
 	int knn_num = 20;
 #else
-	int knn_num2 = 200;
+	int knn_num2 = 100;
 	int knn_num = 100;
 #endif
 
@@ -1145,7 +1145,7 @@ void Raytracer::renderWithPhoton(int width, int height, Point3D eye, Vector3D vi
 				{
 #ifdef KDTREE
 					std::cout << ray.intersection.point << std::endl;
-					photon_col = (1 / 1200.0) * photon_map->findKNNColorWithKDTree(ray.intersection.point, knn_num2);
+					photon_col = (1 / 400.0) * photon_map->findKNNColorWithKDTree(ray.intersection.point, knn_num2);
 					// Colour photon_col2 = (1 / 1200.0) * photon_map->findKNN(ray.intersection.point, knn_num2);
 					// std::cout<<photon_col<<", "<<photon_col2<<::std::endl;
 #else
@@ -1175,6 +1175,12 @@ int main(int argc, char* argv[])
 	// scene and renders it from two different view points, DO NOT
 	// change this if you're just implementing part one of the 
 	// assignment.  
+	int count = 0;
+	char* filename = new char[100];
+	filename = "scene5_view3_a.bmp";
+	for (double angle = 0.0; angle < 20.0; angle++)
+	{
+
 	Raytracer raytracer;
 #ifdef SMALL
 	int width = 480; 
@@ -1186,8 +1192,8 @@ int main(int argc, char* argv[])
 	// int height = 1080; 
 #endif
 #ifdef SMALL_CUBE
-	width = 100;
-	height = 100;
+	width = 300;
+	height = 300;
 #endif
 #ifdef LARGE_CUBE
 	width = 1024;
@@ -1687,7 +1693,9 @@ int main(int argc, char* argv[])
 	sphere->mat->glossy_ind = true;
     
     Texture galaxytex;
-    galaxytex.readImage("./Textures/skysmall.bmp");
+    // galaxytex.readImage("./Textures/skysmall.bmp");
+	// galaxytex.readImage("./Textures/malibu.bmp");
+	galaxytex.readImage("./Textures/room.bmp");
     galaxy->mat->texture = &galaxytex;  
     galaxy->mat->texture_ind = true; 
 	
@@ -1697,10 +1705,11 @@ int main(int argc, char* argv[])
 	double factor3[3] = { 0.6, 0.6, 0.6 };
 	raytracer.translate(cube, Vector3D(-2.5, 0.5, -2.5));	
 	raytracer.translate(sphere, Vector3D(1, 2.5, -1));	
-	raytracer.translate(sphere_2, Vector3D(-1, 3, 1));	
-	raytracer.translate(sphere_3, Vector3D(0, 4, 0));	
+	raytracer.translate(sphere_2, Vector3D(-1 - 0.1*angle, 3, 1));
+	raytracer.translate(sphere_3, Vector3D(0, 4, 0));
     raytracer.scale2(galaxy, Point3D(0, 0, 0), 150);
 
+	raytracer.rotate(galaxy, 'y', 0);
 	raytracer.rotate(plane, 'x', -90); 
 	raytracer.scale(plane, Point3D(0, 0, 0), factor2);
 	raytracer.scale(cube, Point3D(0, 0, 0), factor3);
@@ -1710,33 +1719,37 @@ int main(int argc, char* argv[])
    //  raytracer.scale(plane_2, Point3D(0, 0, 0), factor1);
 	double fov3 = 60;
 	Vector3D up3(0, 1, 0);
-	Point3D eye3(0, 3, -7);
+	Point3D eye3(0, 3, -9);
 	Vector3D view3(0, 0, 1);
-	raytracer.render(width, height, eye3, view3, up3, fov3, "scene5_view3.bmp");
+	char* filename_new = _strdup(filename);
+	filename_new[13] = filename_new[13] + count + 1;
+	count++;
+	raytracer.render(width, height, eye3, view3, up3, fov3, filename_new);
 	time(&timer2);
 	double seconds = difftime(timer2, timer1);
     std::cout<<"First image rendering finished. It takes "<<seconds<<" seconds."<<std::endl;
 
-	timer1 = timer2;
-	double fov2 = 60;
-	Vector3D up2(0, 1, 3);
-	Point3D eye2(0, 9, -3);
-	Vector3D view2(0, -3, 1);
-	raytracer.render(width, height, eye2, view2, up2, fov2, "scene5_view2.bmp");
-	time(&timer2);
-	seconds = difftime(timer2, timer1);
-	std::cout << "third image rendering finished. It takes " << seconds << " seconds." << std::endl;
+	//timer1 = timer2;
+	//double fov2 = 60;
+	//Vector3D up2(0, 1, 3);
+	//Point3D eye2(0, 9, -3);
+	//Vector3D view2(0, -3, 1);
+	//raytracer.render(width, height, eye2, view2, up2, fov2, "scene5_view2.bmp");
+	//time(&timer2);
+	//seconds = difftime(timer2, timer1);
+	//std::cout << "third image rendering finished. It takes " << seconds << " seconds." << std::endl;
 
-	timer1 = timer2;
-	Vector3D up(0, 0, 1);
-	double fov = 60;
-	Point3D eye(0, 9, 0);
-	Vector3D view(0, -1, 0);
-	raytracer.render(width, height, eye, view, up, fov, "scene5_view1.bmp");
-	time(&timer2);
-	// Render it from a different point of view.
-	seconds = difftime(timer2, timer1);
-	std::cout << "Second image rendering finished. It takes " << seconds << " seconds." << std::endl;
+	//timer1 = timer2;
+	//Vector3D up(0, 0, 1);
+	//double fov = 60;
+	//Point3D eye(0, 9, 0);
+	//Vector3D view(0, -1, 0);
+	//raytracer.render(width, height, eye, view, up, fov, "scene5_view1.bmp");
+	//time(&timer2);
+	//// Render it from a different point of view.
+	//seconds = difftime(timer2, timer1);
+	//std::cout << "Second image rendering finished. It takes " << seconds << " seconds." << std::endl;
+	}
 
 #endif	
 #ifdef SCENE6
@@ -2062,7 +2075,7 @@ int main(int argc, char* argv[])
 	// plane_water->mat->normalmap = &waternormal;
 	// plane_water->mat->normal_ind = true;
 	Texture waternormal;
-	waternormal.readImage("./Textures/wavemap.bmp");
+	waternormal.readImage("./Textures/watermap.bmp");
 	cornell_water.normal_ind = true;
 	cornell_water.normalmap = &waternormal;
 
